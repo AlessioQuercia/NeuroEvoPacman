@@ -106,6 +106,14 @@ import org.joml.Vector2d;
 	  
 	  /** Array contentente la forza ad ogni step */
 	  Map<Integer,ArrayList<Double>> forzaMap;
+	  
+	    /////////////////////////////////////////
+	   ///////  IMPLEMENTAZIONE PACMAN  ////////
+	  /////////////////////////////////////////
+	  
+	  Map<Integer, Vector2d> pacmanPositions;
+
+	ArrayList<HashMap<Integer, Vector2d>> ghostsPositions;
 
 	public Map<Integer, ArrayList<Double>> getForzaMap() 
 	{
@@ -418,5 +426,22 @@ public ArrayList<ArrayList<Vector2d>> getClonedLinesChart()
 public void setTargetMap(HashMap<Integer, ArrayList<Vector2d>> targetMap) 
 {
 	this.targetMap = targetMap;
+}
+
+public Map<Integer, Vector2d> getPacmanPositions()
+{
+	return pacmanPositions;
+}
+
+public void setPacmanPositions(Map<Integer, Vector2d> pacmanPositions) {
+	this.pacmanPositions = pacmanPositions;
+}
+
+public ArrayList<HashMap<Integer, Vector2d>> getGhostsPositions() {
+	return ghostsPositions;
+}
+
+public void setGhostsPositions(ArrayList<HashMap<Integer, Vector2d>> ghostsPositions) {
+	this.ghostsPositions = ghostsPositions;
 }
    }

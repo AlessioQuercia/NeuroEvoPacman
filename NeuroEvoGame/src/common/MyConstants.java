@@ -7,8 +7,8 @@ public class MyConstants
 {
 	public static String RES_PATH = "C:/Users/Alessio/Documents/GitHub/NeuroEvoGame/NeuroEvoGame/res/";
 	public static String TITLE = "NEAT Simulation GUI";
-	public static int WIDTH = 800;
-	public static int HEIGHT = 480;
+	public static int WIDTH = 650;
+	public static int HEIGHT = 550;
 	public static int OPTIONS_WIDTH = 220;
 	public static int LANCIO_WIDTH = 520;
 	
@@ -50,14 +50,14 @@ public class MyConstants
 	
 	
 	/////INFORMAZIONI PER START
-	public static String COMPUTER_DIR = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvo\\Neuroevolution\\src\\newGui\\";
-	public static String DATA_DIR = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvo\\Neuroevolution\\src\\newGui\\data\\";
-	public static String RESULTS_DIR = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvo\\Neuroevolution\\src\\newGui\\results\\";
-	public static String POPULATIONS_DIR = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvo\\Neuroevolution\\src\\newGui\\populations\\";
-	public static String PARAMETRI_NOMEFILE = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvo\\Neuroevolution\\src\\gui\\parameters";
-	public static String GENOMA_NOMEFILE = DATA_DIR +"genome_prova";
+//	public static String COMPUTER_DIR = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\NeuroEvoGame\\src\\gui\\";
+	public static String DATA_DIR = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\NeuroEvoGame\\src\\gui\\data\\";
+	public static String RESULTS_DIR = "C:/Users/Alessio/Desktop/results/";
+	public static String POPULATIONS_DIR = "C:/Users/Alessio/Desktop/populations/";
+	public static String PARAMETRI_NOMEFILE = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\NeuroEvoGame\\src\\gui\\data\\parameters";
+	public static String GENOMA_NOMEFILE = DATA_DIR + "pacman_12x0x1";
 	public static String POP_NOMEFILE = DATA_DIR + "primitive";
-	public static String POPULATION_FILENAME = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvo\\Neuroevolution\\src\\newGui\\population_0";
+	public static String POPULATION_FILENAME = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\NeuroEvoGame\\src\\gui\\data\\population_0";
 	
 	////GESTIONE UPDATE E RENDER
 	public static long MILLISECOND = 1000L;

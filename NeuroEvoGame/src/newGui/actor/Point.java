@@ -1,9 +1,10 @@
 package newGui.actor;
 
-import newGui.PacmanActor;
-import newGui.PacmanGame;
-import newGui.PacmanGame.State;
 import java.awt.Rectangle;
+
+import pacmanGui.PacmanActor;
+import pacmanGui.PacmanGame;
+import pacmanGui.PacmanGame.State;
 
 /**
  * Point class.

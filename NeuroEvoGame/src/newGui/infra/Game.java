@@ -5,11 +5,18 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JPanel;
 
+import org.joml.Vector2d;
+
+import common.Direction;
 import common.MyConstants;
+import newGui.actor.Ghost;
+import newGui.actor.Pacman;
 
 /**
  * Game class.
@@ -84,6 +91,41 @@ public class Game{
 
 	public void setScreenScale(Point2D screenScale) {
 		this.screenScale = screenScale;
+	}
+
+	public void reproduceSimulatedGame(int timestep, Map<Integer, Vector2d> pacmanPositions, ArrayList<HashMap<Integer, Vector2d>> ghostsPositions)
+	{
+        for (Actor actor : actors) 
+        {
+        	if (actor instanceof Pacman)
+        	{
+        		Pacman p = (Pacman) actor;
+        		p.reproduceSimulatedMove(timestep, pacmanPositions);
+        	}
+        	else if (actor instanceof Ghost)
+        	{
+        		Ghost g = (Ghost) actor;
+        		g.reproduceSimulatedMove(timestep, ghostsPositions.get(g.type));
+        	}
+        	else
+        		actor.update();
+        }
+	}
+	
+	public void update(Direction direction)
+	{
+        for (Actor actor : actors) 
+        {
+        	if (actor instanceof Pacman)
+        	{
+        		Pacman p = (Pacman) actor;
+        		p.updatePlaying(direction);
+        	}
+        	else
+        	{
+        		actor.update();
+        	}
+        }
 	}
     
 }

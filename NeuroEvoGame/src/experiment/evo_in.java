@@ -4,11 +4,14 @@ import java.util.ArrayList;
 
 public class evo_in 
 {
-	public static String[] inputNames = {"x_target", "y_target", "velocity", "angle", "force", "x_target(t-1)", "y_target(t-1)", "x_target(t-2)", "y_target(t-2)"};
+	public static String[] inputNames = {"pacman_x", "pacman_y", "pacman_x (t-1)", "pacman_y(t-1)",
+										"ghost1_x", "ghost1_y", "ghost2_x", "ghost2_y", "ghost3_x",
+										"ghost3_y", "ghost4_x", "ghost4_y"
+	};
 	
-	   public static int getNumSamples() { return 10; } 
+	   public static int getNumSamples() { return 1; } 
 	   
-	   public static int getNumUnit()    { return 9; } 
+	   public static int getNumUnit()    { return 12; } 
 	 
 	   public static double getInput(double x_obj, double y_obj)
 	   {

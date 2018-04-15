@@ -1,11 +1,17 @@
 package newGui.actor;
 
-import newGui.PacmanActor;
-import newGui.PacmanGame;
-import newGui.PacmanGame.State;
 import newGui.infra.Keyboard;
+import pacmanGui.PacmanActor;
+import pacmanGui.PacmanGame;
+import pacmanGui.PacmanGame.State;
+
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.util.Map;
+
+import org.joml.Vector2d;
+
+import common.Direction;
 
 /**
  * Pacman class.
@@ -16,7 +22,7 @@ public class Pacman extends PacmanActor {
     
     public int col;
     public int row;
-    public int desiredDirection;
+	public int desiredDirection;
     public int direction;
     public int dx;
     public int dy;
@@ -170,6 +176,77 @@ public class Pacman extends PacmanActor {
         }
     }
     
+    public void updatePlaying(Direction dir)
+    {
+        if (!visible) {
+            return;
+        }
+        
+        if (dir == Direction.LEFT) {
+            desiredDirection = 2;
+            System.out.println("LEFT");
+        }
+        else if (dir == Direction.RIGHT) {
+            desiredDirection = 0;
+            System.out.println("RIGHT");
+        }
+        else if (dir == Direction.UP) {
+            desiredDirection = 3;
+            System.out.println("UP");
+        }
+        else if (dir == Direction.DOWN) {
+            desiredDirection = 1;
+            System.out.println("DOWN");
+        }
+        
+        yield:
+        while (true) {
+            switch (instructionPointer) {
+                case 0:
+                    double angle = Math.toRadians(desiredDirection * 90);
+                    dx = (int) Math.cos(angle);
+                    dy = (int) Math.sin(angle);
+                    if (game.maze[row + dy][col + dx] == 0) {
+                        direction = desiredDirection;
+                    } 
+                    
+                    angle = Math.toRadians(direction * 90);
+                    dx = (int) Math.cos(angle);
+                    dy = (int) Math.sin(angle);
+                    if (game.maze[row + dy][col + dx] == -1) {
+                        break yield;
+                    } 
+                    
+                    col += dx;
+                    row += dy;
+                    instructionPointer = 1;
+                case 1:
+                    int targetX = col * 8 - 4 - 32;
+                    int targetY = (row + 3) * 8 - 4;
+                    int difX = (targetX - (int) x);
+                    int difY = (targetY - (int) y);
+                    x += difX == 0 ? 0 : difX > 0 ? 1 : -1;
+                    y += difY == 0 ? 0 : difY > 0 ? 1 : -1;
+                    if (difX == 0 && difY == 0) {
+                        instructionPointer = 0;
+                        if (col == 1) {
+                            col = 34;
+                            x = col * 8 - 4 - 24;
+                        }
+                        else if (col == 34) {
+                            col = 1;
+                            x = col * 8 - 4 - 24;
+                        }
+                    }
+                    break yield;
+            }
+        }
+        updateAnimation();
+        if (game.isLevelCleared()) {
+            game.levelCleared();
+        }
+    }
+    
     private void updateAnimation() {
         int frameIndex = 4 * direction + (int) (System.nanoTime() * 0.00000002) % 4;
         frame = frames[frameIndex];
@@ -249,4 +326,38 @@ public class Pacman extends PacmanActor {
         visible = false;
     }
     
+    public int getCol() {
+		return col;
+	}
+
+	public int getRow() {
+		return row;
+	}
+	
+    public void reproduceSimulatedMove(int timestep, Map<Integer, Vector2d> positions)
+    {
+        switch (game.getState()) 
+        {
+	        case INITIALIZING: updateInitializing(); break;
+	//        case OL_PRESENTS: updateOLPresents(); break;
+//	        case TITLE: updateTitle(); break;
+	        case READY: updateReady(); break;
+	        case READY2: updateReady2(); break;
+	        case PLAYING: updatePlayingReproduced(timestep, positions); break;
+	        case PACMAN_DIED: updatePacmanDied(); break;
+	        case GHOST_CATCHED: updateGhostCatched(); break;
+	        case LEVEL_CLEARED: updateLevelCleared(); break;
+	        case GAME_OVER: updateGameOver(); break;
+        }
+	}
+
+	private void updatePlayingReproduced(int timestep, Map<Integer, Vector2d> positions)
+	{
+		this.row = (int) positions.get(timestep).x;
+		this.col = (int) positions.get(timestep).y;
+		 updateAnimation();
+	        if (game.isLevelCleared()) {
+	            game.levelCleared();
+	        }
+	}
 }

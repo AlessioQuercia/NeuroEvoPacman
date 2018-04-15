@@ -1,13 +1,18 @@
 package newGui.actor;
 
-import newGui.PacmanActor;
-import newGui.PacmanGame;
-import newGui.PacmanGame.State;
 import newGui.infra.ShortestPathFinder;
+import pacmanGui.PacmanActor;
+import pacmanGui.PacmanGame;
+import pacmanGui.PacmanGame.State;
+
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.joml.Vector2d;
 
 /**
  * Ghost class.
@@ -30,8 +35,8 @@ public class Ghost extends PacmanActor {
     public int dy;
     public int col;
     public int row;
-    
-    public int direction = 0;
+
+	public int direction = 0;
     public int lastDirection;
     
     public List<Integer> desiredDirections = new ArrayList<Integer>();
@@ -537,5 +542,37 @@ public class Ghost extends PacmanActor {
     public void died() {
         setMode(Mode.DIED);
     }
+    
+    public int getCol() {
+		return col;
+	}
+
+	public int getRow() {
+		return row;
+	}
+	
+	public void updatePlayingReproduced(int timestep, HashMap<Integer, Vector2d> positions)
+	{
+		this.row = (int) positions.get(timestep).x;
+		this.col = (int) positions.get(timestep).y;
+		 updateAnimation();
+	}
+	
+    public void reproduceSimulatedMove(int timestep, HashMap<Integer, Vector2d> positions)
+    {
+        switch (game.getState()) 
+        {
+	        case INITIALIZING: updateInitializing(); break;
+	//        case OL_PRESENTS: updateOLPresents(); break;
+//	        case TITLE: updateTitle(); break;
+	        case READY: updateReady(); break;
+	        case READY2: updateReady2(); break;
+	        case PLAYING: updatePlayingReproduced(timestep, positions); break;
+	        case PACMAN_DIED: updatePacmanDied(); break;
+	        case GHOST_CATCHED: updateGhostCatched(); break;
+	        case LEVEL_CLEARED: updateLevelCleared(); break;
+	        case GAME_OVER: updateGameOver(); break;
+        }
+	}
         
 }

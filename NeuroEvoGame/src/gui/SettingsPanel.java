@@ -181,7 +181,7 @@ public class SettingsPanel extends JPanel implements ActionListener
 		 {
 			 parameterSettings.getUpperPanel().setNetx(new Neat());
 			 parameterSettings.getUpperPanel().getNetx().initbase();
-			 boolean rc = parameterSettings.getUpperPanel().getNetx().readParam(MyConstants.COMPUTER_DIR + MyConstants.DEFAULT_PARAMETERS);
+			 boolean rc = parameterSettings.getUpperPanel().getNetx().readParam(MyConstants.DATA_DIR + MyConstants.DEFAULT_PARAMETERS);
 			 
 			 if (!rc)
 				 System.out.println("Error restoring default parameters!");
@@ -194,7 +194,7 @@ public class SettingsPanel extends JPanel implements ActionListener
 		 
 		 if (p.getActionCommand().equals("Restore default settings"))
 		 {
-			 otherSettings.getUpperPanel().loadSettings(MyConstants.COMPUTER_DIR + MyConstants.DEFAULT_OTHER_SETTINGS);
+			 otherSettings.getUpperPanel().loadSettings(MyConstants.DATA_DIR + MyConstants.DEFAULT_OTHER_SETTINGS);
 			 otherSettings.getUpperPanel().updateComboBoxes();
 		 }
 	}

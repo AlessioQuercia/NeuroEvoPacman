@@ -2,9 +2,9 @@ package experiment;
 
 public class evo_out 
 {
-	public static String[] outputNames = {"angle", "force", "leave-boolean"};
+	public static String[] outputNames = {"direction"};
 	
-	   public static int getNumUnit() { return 3; } 
+	   public static int getNumUnit() { return 1; } 
 	   
 	   public static double getTarget(double y_obj) 
 	   { 

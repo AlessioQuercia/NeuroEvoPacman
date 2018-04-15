@@ -1,8 +1,8 @@
 package newGui.actor;
 
-import newGui.PacmanActor;
-import newGui.PacmanGame;
-import newGui.PacmanGame.State;
+import pacmanGui.PacmanActor;
+import pacmanGui.PacmanGame;
+import pacmanGui.PacmanGame.State;
 
 /**
  * Ready class.

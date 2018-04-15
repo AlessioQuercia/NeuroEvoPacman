@@ -1,8 +1,8 @@
 package newGui.actor;
 
-import newGui.PacmanActor;
-import newGui.PacmanGame;
-import newGui.PacmanGame.State;
+import pacmanGui.PacmanActor;
+import pacmanGui.PacmanGame;
+import pacmanGui.PacmanGame.State;
 
 /**
  * Initializer class.
@@ -24,12 +24,13 @@ public class Initializer extends PacmanActor {
                     waitTime = System.currentTimeMillis();
                     instructionPointer = 1;
                 case 1:
-                    if (System.currentTimeMillis() - waitTime < 3000) {
+                    if (System.currentTimeMillis() - waitTime < 1000) {
                         break yield;
                     }
                     instructionPointer = 2;
                 case 2:
-                    game.setState(State.OL_PRESENTS);
+//                    game.setState(State.OL_PRESENTS);
+                    game.setState(State.TITLE);
                     break yield;
             }
         }

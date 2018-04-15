@@ -41,6 +41,7 @@ import javax.swing.text.Document;
 import org.joml.Vector2d;
 
 import common.MyConstants;
+import experiment.OrganismRunnablePacMan;
 import experiment.evo_fit;
 import experiment.evo_in;
 import experiment.evo_out;
@@ -57,6 +58,7 @@ import jneat.Organism;
 import jneat.Population;
 import jneat.Species;
 import log.HistoryLog;
+import pacmanGui.PacmanGame;
 
 public class MainPanel extends JPanel implements Runnable
 {
@@ -224,45 +226,14 @@ private boolean done;
 		int prevSelectedSettings = -1;
 		int currSelectedSettings = 0;
 		
-		double x = 0;
-		double a = 0;
-		double v = 0;
-		double x_tgt = 0;
-		double y_tgt = 0;
-		
-		int simGen = 0;
 		int prevNetGen = -1;
 		int currNetGen = 0;
-		String prevSelectedChart = graphs.getLeftPanel().getOptionsPanel().getChartList().getSelectedItem().toString();
 		
 		int prevForzaGen = -1;
 		int currForzaGen = 0;
 		
 		int prevSelectedThrow = -1;
 		int currSelectedThrow = graphs.getLeftPanel().getForzaOptionsPanel().getThrowList().getSelectedIndex();
-		
-		double x_rimbalzo = 0; // per traslare la parabola
-		double X_rimbalzo = 0;
-		
-		double y_rimbalzo = 0;
-		double Y_rimbalzo = 0;
-		
-		double t_sim = 0;
-		double x_sim = 0;
-		double y_sim = 0;
-		double x_rim_sim = 0;
-		double y_rim_sim = 0;
-		double t_rim_sim = 0;
-		double v_rim_sim = -1;
-		double h_max = 0;
-		double gittata = 0;
-		double diametro = 0.05;	// Il diametro del corpo lanciato è di 50 mm (5 cm)
-		
-		int targetPos = 0;
-		double t_charge = 0;
-		
-		// Mappa rappresentante il vettore velocità: ad ogni istante t è associata una coppia di valori ( v_x(t) = v0x , v_y(t) )
-		Map<Double, Vector2d> vel_vector = new HashMap<Double, Vector2d> ();
 		
 		double prevSelectedOrgIndex = -1;
 		
@@ -272,10 +243,6 @@ private boolean done;
 		double currentHeight = MainFrame.HEIGHT;
 		double currentWidth = MainFrame.WIDTH;
 		
-		double currentDisplayWidth = evolution.getRightPanel().getWidth();
-		double currentDisplayHeight = evolution.getRightPanel().getHeight();
-		
-		
         long desiredFrameRateTime = 1000 / 60;
         long currentTime = System.currentTimeMillis();
         long lastTime = currentTime - desiredFrameRateTime;
@@ -284,65 +251,79 @@ private boolean done;
         
         double scaleX = 2;
         double scaleY = 2;
+        
+        int timestep = 0;
+        Map<Integer, Vector2d> pacmanPositions = null;
+        ArrayList<HashMap<Integer, Vector2d>> ghostsPositions = null;
+        
+        boolean gameStarted = false;
 		
 		while (isRunning)
-		{
-			evolution.getRightPanel().requestFocus();
-//			evolution.game.setScreenSize(evolution.getRightPanel().getSize());
-//			evolution.game.setScreenScale(new Point2D.Double(5, 5));
-//			evolution.getRightPanel().setPreferredSize(evolution.getRightPanel().getSize());
-//			System.out.println(evolution.getRightPanel().getGame().screenSize);
-//			System.out.println(evolution.getRightPanel().size());
-			
-			scaleX = evolution.getRightPanel().getWidth()/evolution.getRightPanel().getGame().screenSize.getWidth();
-			scaleY = evolution.getRightPanel().getHeight()/evolution.getRightPanel().getGame().screenSize.getHeight();
-			
-//			System.out.println(scaleX + "   " + scaleY);
-			
-			currentDisplayWidth = evolution.getRightPanel().getWidth();
-			currentDisplayHeight = evolution.getRightPanel().getHeight();
-			
+		{	
 			long startTime = System.currentTimeMillis();
 			
-			currentTime = System.currentTimeMillis();
-            unprocessedTime += currentTime - lastTime;
-            lastTime = currentTime;
-            
-            while (unprocessedTime >= desiredFrameRateTime) {
-                unprocessedTime -= desiredFrameRateTime;
-                evolution.getRightPanel().update();
-                needsRender = true;
-            }
-            
-            if (needsRender) {
-                Graphics2D g = (Graphics2D) evolution.getRightPanel().getGraphics2D();
-    			evolution.getRightPanel().getGame().setScreenScale(new Point2D.Double(scaleX, scaleY));
-                evolution.getRightPanel().repaint();
-                needsRender = false;
-            }
-            else {
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException ex) {
-                }
-            }
-			
-			if (MyConstants.LOADED_INPUTS)
+			if (evolution.getStart() && winners.size() > 0)
 			{
-				t_sim = 0;
-				x_sim = 0;
-				y_sim = 0;
-				x_rim_sim = 0;
-				y_rim_sim = 0;
-				t_rim_sim = 0;
-				v_rim_sim = -1;
-				h_max = 0;
-				gittata = 0;
-				targetPos = 0;
-				t_charge = 0;
-//				evolution.getRightPanel().resetTail();
-//				evolution.getRightPanel().resetTargetTail();
+				// REPRODUCING PACMAN SIMULATION
+				evolution.getRightPanel().requestFocus();
 				
+				scaleX = evolution.getRightPanel().getWidth()/evolution.getRightPanel().getGame().screenSize.getWidth();
+				scaleY = evolution.getRightPanel().getHeight()/evolution.getRightPanel().getGame().screenSize.getHeight();
+				
+				currentTime = System.currentTimeMillis();
+	            unprocessedTime += currentTime - lastTime;
+	            lastTime = currentTime;
+	            
+				int gen = evolution.getLeftPanel().getOptionsPanel().getGenerationList().getSelectedIndex();
+				String lancio = evolution.getLeftPanel().getOptionsPanel().getThrowList().getSelectedItem().toString();
+
+				Organism selectedOrg = winners.get(0);
+				
+	            while (unprocessedTime >= desiredFrameRateTime) {
+	                unprocessedTime -= desiredFrameRateTime;
+	                
+	                // REPRODUCE THE POSITIONS CHOSEN BY THE SIMULATION MADE WITH NEURAL NETWORKS AND THE GENETIC ALGORITHM (NEAT)
+	                // (reproduce the whole simulation??)
+	                // (make methods to reproduce the game just by giving the position used in the simulation??)
+	                
+	                pacmanPositions = selectedOrg.getPacmanPositions();
+	                
+	                ghostsPositions = selectedOrg.getGhostsPositions();
+	                
+	                if (timestep >= selectedOrg.getGhostsPositions().get(0).size())
+	                {
+	                	timestep = 0;
+	                	
+	                }
+	                
+	                if (!gameStarted)
+	                {
+	                	gameStarted = true;
+	                	evolution.getRightPanel().getGame().startGame();
+	                }
+	                
+	                evolution.getRightPanel().reproduceSimulatedGame(timestep, pacmanPositions, ghostsPositions);	// REPRODUCE THE SIMULATED GAME
+	                
+	                timestep++;
+	                
+	                needsRender = true;
+	            }
+	            
+	            if (needsRender) {
+	                Graphics2D g = (Graphics2D) evolution.getRightPanel().getGraphics2D();
+	    			evolution.getRightPanel().getGame().setScreenScale(new Point2D.Double(scaleX, scaleY));
+	                evolution.getRightPanel().repaint();
+	                needsRender = false;
+	            }
+	            else {
+	                try {
+	                    Thread.sleep(1);
+	                } catch (InterruptedException ex) {
+	                }
+	            }
+			}
+			if (MyConstants.LOADED_INPUTS)
+			{				
 				Organism organism = winners.get(
 						evolution.getLeftPanel().getOptionsPanel().
 						getGenerationList().getSelectedIndex());
@@ -495,255 +476,15 @@ private boolean done;
 					prevSelectedOrgIndex = selectedOrgIndex;
 					prevSelectedThrow = selectedThrow;
 					
-					t_sim = 0;
-					x_sim = 0;
-					y_sim = 0;
-					vel_vector.clear();
-					x_rim_sim = 0;
-					y_rim_sim = 0;
-					t_rim_sim = 0;
-					v_rim_sim = -1;
-					h_max = 0;
-					gittata = 0;
-					targetPos = 0;
-					t_charge = 0;
-//					evolution.getRightPanel().resetTail();
-//					evolution.getRightPanel().resetTargetTail();
+
 					
 					evolution.getLeftPanel().updateInfoRete(selectedOrg.getMap().get(EnvConstant.NUMBER_OF_SAMPLES));
 					evolution.getLeftPanel().updateInfoLancio(infoLancio);
 					
-					x_tgt = infoLancio.get(MyConstants.X_TARGET_INDEX);
-					y_tgt = infoLancio.get(MyConstants.Y_TARGET_INDEX);
+					
 
 					evolution.repaint();
 				}
-				
-				if (targetPos >= selectedOrg.getTargetMap().get(selectedThrow).size())
-					targetPos--;
-
-				double prova_x = x_tgt + infoLancio.get(MyConstants.VEL_RET_X_INDEX)*(t_charge + t_sim);
-				double prova_y = y_tgt + infoLancio.get(MyConstants.VEL_RET_Y_INDEX)*(t_charge + t_sim);
-				
-//	            double X_tgt = evolution.getRightPanel().proportionX(prova_x);
-//	            double Y_tgt = evolution.getRightPanel().proportionY(prova_y);
-//
-//				evolution.getRightPanel().getTarget().setFrame(MyConstants.BORDER_X + X_tgt - 2.5, 
-//						(evolution.getRightPanel().getHeight()-MyConstants.BORDER_Y) - Y_tgt - 2.5, 5, 5);
-				
-//				if (MyConstants.SETTINGS_VALUES[MyConstants.SIM_SHOW_BEST_INDEX])
-//				{
-//		            double bestTgt_x = evolution.getRightPanel().proportionX(infoLancio.get(MyConstants.BEST_TARGET_X_INDEX));
-//		            double bestTgt_y = evolution.getRightPanel().proportionY(infoLancio.get(MyConstants.BEST_TARGET_Y_INDEX));
-//		            double bestShot_x = evolution.getRightPanel().proportionX(infoLancio.get(MyConstants.X_MIGLIORE_INDEX));
-//		            double bestShot_y = evolution.getRightPanel().proportionY(infoLancio.get(MyConstants.Y_MIGLIORE_INDEX));
-//					
-//					evolution.getRightPanel().getBestTarget().setFrame(MyConstants.BORDER_X + bestTgt_x - 2.5, 
-//							(evolution.getRightPanel().getHeight()-MyConstants.BORDER_Y) - bestTgt_y - 2.5, 5, 5);
-//					
-//					evolution.getRightPanel().getBestShot().setFrame(MyConstants.BORDER_X + bestShot_x - 1.5, 
-//							(evolution.getRightPanel().getHeight()-MyConstants.BORDER_Y) - bestShot_y - 1.5, 3, 3);
-//				
-//				}
-				
-				
-				simGen = evolution.getLeftPanel().getOptionsPanel().getGenerationList().getSelectedIndex();
-				Organism o = winners.get(simGen);
-
-				ArrayList<Double> bestThrow = evo_fit.computeMinVel(prova_x, prova_y);
-
-				
-//				evolution.getRightPanel().setA(bestThrow.get(0));
-//				evolution.getRightPanel().setV(bestThrow.get(1));
-				
-				a = infoLancio.get(MyConstants.ANGOLO_INDEX);
-				v = infoLancio.get(MyConstants.VELOCITA_INDEX);
-				
-				// INIZIO SIMULAZIONE MOTO PARABOLICO DEL CORPO
-				
-				// Aggiorna le componenti del vettore velocità per l'istante t
-				double v_x = v*Math.cos(a);
-				
-				double v_y = v*Math.sin(a) - MyConstants.GRAVITY*t_sim;
-				
-				vel_vector.put(t_sim, new Vector2d(v_x, v_y));
-				
-				
-				// Aggiorna la posizione del corpo utilizzando le equazioni del moto per l'istante t
-				x_sim = v*Math.cos(a)*t_sim;
-				
-				y_sim = v*Math.sin(a)*t_sim - 0.5*MyConstants.GRAVITY*Math.pow(t_sim, 2);
-				
-				// Calcola le proporzioni per la rappresentazione grafica
-//				double X_sim = evolution.getRightPanel().proportionX(x_sim);
-//				double Y_sim = evolution.getRightPanel().proportionY(y_sim);
-
-				// Aggiorna le posizioni nella rappresentazione grafica (corpo + coda)
-//    			evolution.getRightPanel().getPeso().setFrame(
-//    					MyConstants.BORDER_X+X_sim -1.5,(evolution.getRightPanel().getHeight()-MyConstants.BORDER_Y) - Y_sim - 1.5, 3, 3);
-    			
-//    			if (y_sim >= 0) 
-//    				evolution.getRightPanel().getTail().add(
-//    						new Vector2d(MyConstants.BORDER_X+X_sim, (evolution.getRightPanel().getHeight()-MyConstants.BORDER_Y) - Y_sim));
-    			
-//    			if (evolution.getRightPanel().getTail().size() > MyConstants.TAIL_LENGTH)
-//    			{
-//    				evolution.getRightPanel().getTail().removeFirst();
-//    			}
-    			
-//    			if (prova_x >= 0 && prova_y >= 0)
-//    			{
-//    				evolution.getRightPanel().getTargetTail().add(
-//    						new Vector2d(MyConstants.BORDER_X+X_tgt, (evolution.getRightPanel().getHeight()-MyConstants.BORDER_Y) - Y_tgt));
-//    			}
-//    			
-//    			if (evolution.getRightPanel().getTargetTail().size() > MyConstants.TARGET_TAIL_LENGTH)
-//    			{
-//    				evolution.getRightPanel().getTargetTail().removeFirst();
-//    			}
-				
-//				if (y_sim > 0)
-//				{
-//					gittata = 2*v*Math.cos(a)*v*Math.sin(a)/MyConstants.GRAVITY;	// gittata
-//					h_max = ( Math.pow(v, 2)*Math.pow(Math.sin(a), 2) ) / (2*MyConstants.GRAVITY);	// altezza massima
-//					v_rim_sim = Math.sqrt( (2*MyConstants.GRAVITY*(h_max-diametro/2)) );	// velocità di rimbalzo (nel caso in cui il corpo sia elastico, es: palla da tennis)
-//					
-////					System.out.println(v_rim_sim);
-//					
-//					double m1 = infoLancio.get(MyConstants.MASSA_INDEX);	// massa del proiettile
-//					double m2 = MyConstants.MASSA_TERRA;	// massa della terra
-//					
-//					double v1 = infoLancio.get(MyConstants.VELOCITA_INDEX);	// VELOCITA' INIZIALE DEL PROIETTILE
-//					double v2 = 0;//MyConstants.VELOCITA_TERRA;	// VELOCITA' DI ROTAZIONE DELLA TERRA
-//					
-//					v_rim_sim = - ((((m1 - m2)*v1 + 2*m2*v2)/(m1 + m2)) * MyConstants.ATTRITO);
-//					
-////					System.out.println(v_rim_sim + " vs " + v);
-//					
-//					if (x_sim > MyConstants.ASSE_X)	// RESETTA IL LANCIO
-//					{
-//						x_sim = 0;
-//						y_sim = 0;
-//						t_sim = 0;
-//						vel_vector.clear();
-//						x_rim_sim = 0;
-//						y_rim_sim = 0;
-//						t_rim_sim = 0;
-//						gittata = 0;
-//						h_max = 0;
-//						v_rim_sim = -1;
-////						simulation.getRightPanel().resetTail();
-//						targetPos = 0;
-//						t_charge = 0;
-//						evolution.getRightPanel().resetTargetTail();
-//					}
-//				}
-//				
-//				// Aggiorna il tempo t e la posizione del target(l'indice dell'array delle posizioni del target)
-//				if (t_charge == o.getMap().get(selectedThrow).get(MyConstants.TEMPO_INDEX))
-//				{
-//					t_sim += 0.04;
-//					targetPos++;
-//				}
-//				if (t_charge < o.getMap().get(selectedThrow).get(MyConstants.TEMPO_INDEX)) 
-//				{
-//					t_charge += 0.04;
-//					targetPos++;
-//				}
-//				
-////				System.out.println(o.getTargetMap().get(selectedThrow).get(0).x + " " + o.getTargetMap().get(selectedThrow).get(o.getTargetMap().get(selectedThrow).size()-1).x);
-//				
-//				// Controllo x e y per resettare il lancio (x > asse_X) o per effettuare il rimbalzo (y = 0)
-//				if (MyConstants.SETTINGS_VALUES[MyConstants.SIM_PHYSICS])
-//				{
-//					if (y_sim < 0)	// RIMBALZA
-//					{
-//	//					System.out.println("VELOCITA_RIMBALZO = " + v_rim + " vs V_0 = " + v);
-//						x_rim_sim = v_rim_sim*Math.cos(a)*t_rim_sim + gittata;
-//						y_rim_sim = v_rim_sim*Math.sin(a)*t_rim_sim - 0.5*MyConstants.GRAVITY*Math.pow(t_rim_sim, 2);
-//						double X_rim_sim = evolution.getRightPanel().proportionX(x_rim_sim);
-//						double Y_rim_sim = evolution.getRightPanel().proportionY(y_rim_sim);
-//	
-//		    			evolution.getRightPanel().getPeso().setFrame(
-//		    					MyConstants.BORDER_X+X_rim_sim -1.5,(evolution.getRightPanel().getHeight()-MyConstants.BORDER_Y) - Y_rim_sim - 1.5, 3, 3);
-//		    			
-//		    			if (y_rim_sim >= 0)
-//		    				evolution.getRightPanel().getTail().add(
-//		    					new Vector2d(MyConstants.BORDER_X+X_rim_sim, (evolution.getRightPanel().getHeight()-MyConstants.BORDER_Y) - Y_rim_sim));
-//		    			
-//		    			if (evolution.getRightPanel().getTail().size() > MyConstants.TAIL_LENGTH)
-//		    			{
-//		    				evolution.getRightPanel().getTail().removeFirst();
-//		    			}
-//		    			
-//						// Aggiorna il tempo t della parabola di rimbalzo
-//		    			t_rim_sim += 0.04;
-//	
-//	//					System.out.println("X = " + x_sim + ", Y = " + y_rim_sim);
-//					}
-//					if (y_rim_sim < 0)
-//					{
-//						x_rim_sim = 0;
-//						y_rim_sim = 0;
-//						t_rim_sim = 0;
-//						
-//						// aggiorna gittata, altezza massima e velocità di rimbalzo in base all'ultimo rimbalzo
-//						gittata += 2*v_rim_sim*Math.cos(a)*v_rim_sim*Math.sin(a)/MyConstants.GRAVITY;	// nuova gittata
-//						h_max = ( Math.pow(v_rim_sim, 2)*Math.pow(Math.sin(a), 2) ) / (2*MyConstants.GRAVITY);	// nuova altezza massima
-////						v_rim_sim = Math.sqrt( (2*MyConstants.GRAVITY*(h_max-diametro/2)) );	// nuova velocità di rimbalzo
-//						
-//						double m1 = infoLancio.get(MyConstants.MASSA_INDEX);	// massa del proiettile
-//						double m2 = MyConstants.MASSA_TERRA;	// massa della terra
-//						
-//						double v1 = v_rim_sim;	// VELOCITA' INIZIALE DEL PROIETTILE
-//						double v2 = 0;//MyConstants.VELOCITA_TERRA;	// VELOCITA' DI ROTAZIONE DELLA TERRA
-//						
-//						v_rim_sim = - ((((m1 - m2)*v1 + 2*m2*v2)/(m1 + m2)) * MyConstants.ATTRITO);
-//						
-////						System.out.println(v_rim_sim + " vs " + v1);
-//					}
-//					if (x_rim_sim > MyConstants.ASSE_X || Double.isNaN(v_rim_sim) || (v_rim_sim < 0.5 && v_rim_sim >= 0)
-//							|| prova_x < 0 || prova_y < 0)	// RESETTA IL LANCIO
-//					{
-//	//					System.out.println("Lancia ancora");
-//						x_sim = 0;
-//						y_sim = 0;
-//						t_sim = 0;
-//						vel_vector.clear();
-//						x_rim_sim = 0;
-//						y_rim_sim = 0;
-//						t_rim_sim = 0;
-//						gittata = 0;
-//						h_max = 0;
-//						v_rim_sim = -1;
-//						evolution.getRightPanel().resetTail();
-//						evolution.getRightPanel().resetTargetTail();
-//						targetPos = 0;
-//						t_charge = 0;
-//					}
-//				}
-//				else	// Se il rimbalzo (collisione con il terreno) è disabilitato, allora quando tocca l'asse delle x (y = 0) resetta il lancio
-//				{
-//					if (y_sim<0)
-//					{
-////						t_sim = 0;
-//						x_sim = 0;
-//						y_sim = 0;
-//						t_sim = 0;
-//						vel_vector.clear();
-//						x_rim_sim = 0;
-//						y_rim_sim = 0;
-//						t_rim_sim = 0;
-//						gittata = 0;
-//						h_max = 0;
-//						v_rim_sim = -1;
-////						simulation.getRightPanel().resetTail();
-//						targetPos = 0;
-//						t_charge = 0;
-//						evolution.getRightPanel().resetTargetTail();
-//					}
-//				}
-//				// FINE SIMULAZIONE MOTO PARABOLICO DEL CORPO
 				
 				evolution.getRightPanel().repaint();
 			}
@@ -792,13 +533,6 @@ private boolean done;
 				
 				graphs.repaint();
 			}
-			
-//			if (tabbedPanel.getSelectedIndex() == 1 && (!simulation.getStart() && !simulation.getLoad()) && !graphs.getLeftPanel().getOptionsPanel().getChartList().getSelectedItem().toString().equals(prevSelectedChart))
-//			{
-//				prevSelectedChart = graphs.getLeftPanel().getOptionsPanel().getChartList().getSelectedItem().toString();
-//				
-//				graphs.repaint();
-//			}
 			
 			if (tabbedPanel.getSelectedIndex() == 2 && (evolution.getStart() || evolution.getLoad()) && winners.size() > 0
 					&& net.getLeftPanel().getOptionsPanel().getGenerationList().getItemCount()>0)
@@ -870,47 +604,7 @@ private boolean done;
 		}
 	}
 	
-	/// SIMULAZIONE MOTO PROIETTILE ///
-	
-	
-//	public void simulate()
-//	{
-//		double t_sim = 0;
-//		double x_sim = 0;
-//		double y_sim = 0;
-//		
-//		// Mappa rappresentante il vettore velocità: ad ogni istante t è associata una coppia di valori ( v_x(t) = v0x , v_y(t) )
-//		Map<Double, Vector2d> vel_vector = new HashMap<Double, Vector2d> ();
-//		
-//		
-//		// Aggiorna le componenti del vettore velocità per l'istante t
-//		double v_x = v0*Math.cos(a);
-//		
-//		double v_y = v0*Math.sin(a) - MyConstants.GRAVITY*t_sim;
-//		
-//		vel_vector.put(t_sim, new Vector2d(v_x, v_y));
-//		
-//		
-//		// Aggiorna la posizione del corpo utilizzando le equazioni del moto per l'istante t
-//		x_sim = v0*Math.cos(a)*t_sim;
-//		
-//		y_sim = v0*Math.sin(a)*t_sim - 0.5*MyConstants.GRAVITY*Math.pow(t_sim, 2);
-//		
-//		
-//		// Aggiorna il tempo t
-//		t_sim += 0.04;
-//	}
-	
-	
-	
-	
-	
-	
-	
-	
 	/// START DA INTERFACCIA NUOVA ///
-	
-	
 	
 	   public void startProcessAsync()
 	  {
@@ -1210,7 +904,11 @@ private boolean done;
 			//point to organism
 			   Organism organism = ((Organism) itr_organism.next());
 			   
-				fixedPool.submit(new OrganismRunnableMovement(organism));	//// VERSIONE PARALLELA
+			   PacmanGame pacmanGame = new PacmanGame();
+			   pacmanGame.init();
+			   pacmanGame.startGame();
+			   
+				fixedPool.submit(new OrganismRunnablePacMan(organism, pacmanGame/*evolution.getRightPanel().getGame()*/));	//// VERSIONE PARALLELA
 				
 //			//// VERSIONE SERIALE
 //			//evaluate 
@@ -1415,492 +1113,6 @@ private boolean done;
 			   return false;
 			}
 	  }
-	
-	   public boolean evaluate(Organism organism) 
-		  {
-			 double fit_dyn = 0.0;
-			 double err_dyn = 0.0;
-			 double win_dyn = 0.0;
-			 double angle = 0.0;
-			 double velocity = 0.0;
-			 double y_target = 0.0;
-			 double x_target = 0.0;
-			 double total_err = 0.0;
-			 Map<Integer,ArrayList<Double>> map = null;
-		  // per evitare errori il numero di ingressi e uscite viene calcolato in base
-		  // ai dati ;
-		  // per le unit di input a tale numero viene aggiunto una unit bias
-		  // di tipo neuron
-		  // le classi di copdifica input e output quindi dovranno fornire due
-		  // metodi : uno per restituire l'input j-esimo e uno per restituire
-		  // il numero di ingressi/uscite
-		  // se I/O è da file allora è il metodo di acesso ai files che avrà lo
-		  // stesso nome e che farà la stessa cosa.
-		  
-			 Network _net = null;
-			 boolean success = false;
-		  
-			 double errorsum = 0.0;
-			 int net_depth = 0; //The max depth of the network to be activated
-			 int count = 0;
-		  
-		  
-		  
-		  //	  			   System.out.print("\n evaluate.step 1 ");
-		  
-			 
-			 
-			 double in[] = null;
-			 in = new double[EnvConstant.NR_UNIT_INPUT + 1];
-//			 in = new double[EnvConstant.NR_UNIT_INPUT];
-		  
-		  // setting bias
-		  
-			 in[EnvConstant.NR_UNIT_INPUT] = 1.0;
-		  
-			 double out[][] = null;
-			 out = new double[EnvConstant.NUMBER_OF_SAMPLES][EnvConstant.NR_UNIT_OUTPUT];
-		  
-			 //double tgt[][] = null;
-			 //tgt = new double[EnvConstant.NUMBER_OF_SAMPLES][EnvConstant.NR_UNIT_OUTPUT];
-			 double tgt[][] = null;
-			 tgt = new double[EnvConstant.NUMBER_OF_SAMPLES][EnvConstant.NR_UNIT_INPUT+1];
-			 
-		  
-			 Integer ns = new Integer(EnvConstant.NUMBER_OF_SAMPLES);
-		  
-		  
-			 _net = organism.net;
-			 net_depth = _net.max_depth();
-		  
-		   // pass the number of node in genome for add a new 
-		   // parameter of evaluate the fitness
-		   //
-			 int xnn = _net.getAllnodes().size();
-			 Integer nn = new Integer(xnn);
-		  
-		  
-			 //Class[] params = {int.class, int.class , double[][].class, double[][].class};
-			 //Object paramsObj[] = new Object[] {ns, nn, out, tgt};
-			 Class[] params = {int.class, double[][].class, double[][].class};
-			 Object paramsObj[] = new Object[] {ns, out, tgt};
-			 
-//			 double minX = 40;
-//			 double maxX = 60;	//X massima 100 [40+60]
-//			 double minY = 20;
-//			 double maxY = 80;	//Y massima 100 [20+80]
-			 
-//			 Random rx = new Random();
-//			 long seedX = 10;
-//			 rx.setSeed(seedX);
-//			 Random ry = new Random();
-//			 long seedY = 1000;
-//			 ry.setSeed(seedY);
-			 
-//			 double[] inputX = new double[EnvConstant.NUMBER_OF_SAMPLES];
-//			 double[] inputY = new double[EnvConstant.NUMBER_OF_SAMPLES];
-//			 double[] inputX = {rx.nextDouble(), rx.nextDouble(), rx.nextDouble(), rx.nextDouble(), rx.nextDouble(),
-//					 rx.nextDouble(), rx.nextDouble(), rx.nextDouble(), rx.nextDouble(), rx.nextDouble()};
-//			 double[] inputY = {ry.nextDouble(), ry.nextDouble(), ry.nextDouble(), ry.nextDouble(), ry.nextDouble(),
-//					 ry.nextDouble(), ry.nextDouble(), ry.nextDouble(), ry.nextDouble(), ry.nextDouble()};
-//			 double[] inputX = {40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 45.0, 55.0, 65.0};
-//			 double[] inputY = {70.0, 30.0, 20.0, 50.0, 60.0, 35.0, 45.0, 100.0, 75.0, 95.0};
-			 
-//			 for (int i=0; i<EnvConstant.NUMBER_OF_SAMPLES; i++)
-//				 input[i]=Math.random();
-			 
-
-
-//			 for (count = 0; count < EnvConstant.NUMBER_OF_SAMPLES; count++) 
-//			 {
-////				 x = minX + Math.random()*maxX;
-////				 y = minY + Math.random()*maxY;
-////				 x = rx.nextFloat();
-////				 y = ry.nextFloat();
-//				 inputX[count] = x;
-//				 inputY[count] = y;
-//			 }
-		  
-			 if (EnvConstant.TYPE_OF_SIMULATION == EnvConstant.SIMULATION_FROM_CLASS)
-			 {
-			 
-			 
-			 // case of input from class java
-			 
-				try 
-				{
-				   //int plist_in[] = new int[2];
-				   //Class[] params_inp = {int[].class};
-				   //Object[] paramsObj_inp = new Object[] {plist_in};
-
-//				   Class[] params_inp = {double.class};
-//				   Object[] paramsObj_inp = new Object[] {y};
-					 String mask6d = "  0.00000";
-					 DecimalFormat fmt6d = new DecimalFormat(mask6d);
-					 
-					 Random rx = new Random();
-
-					 Random ry = new Random();
-
-					 Random rm = new Random();
-					 
-//					 //***** INPUT RIPETUTI *****//
-//					 rx.setSeed(100);
-//					 ry.setSeed(10000);
-//					 rm.setSeed(1000);
-					 
-					 //***** INPUT RANDOM *****//
-					 long seedX = (long)(Math.random()*100);	
-					 rx.setSeed(seedX);
-					 long seedY = (long)(Math.random()*10000);
-					 ry.setSeed(seedY);
-					 long seedM = (long)(Math.random()*1000);
-					 rm.setSeed(seedM);
-					 
-					 
-				   for (count = 0; count < EnvConstant.NUMBER_OF_SAMPLES; count++) 
-				   {
-//					   y = Math.random()*maxY;
-//					   input[count] = y;
-					  //plist_in[0] = count;
-				   // first activation from sensor to first next level of neurons
-//					  for (int j = 0; j < EnvConstant.NR_UNIT_INPUT; j++) 
-//					  {
-//						 //plist_in[1] = j;
-//						 Method_inp = Class_inp.getMethod("getInput", params_inp);
-//						 ObjRet_inp = Method_inp.invoke(ObjClass_inp, paramsObj_inp);
-//						 double v1 = Double.parseDouble(ObjRet_inp.toString());
-//						 in[j] = v1;
-//					  }
-					   
-
-					   ///IMPLEMENTAZIONE DECISIONE DI LANCIO   
-					   
-					   double delta_t = 0.04;
-					   double current_time = 0;
-					   double minX = 20;
-					   double maxX = 80;
-					   double minY = 20;
-					   double maxY = 80;
-					   double minM = 1;
-					   double maxM = 2;
-					   double massa = minM + rm.nextDouble()*maxM;	// 2kg
-					   double v = 0;
-					   double minF = 15;	// forza minima
-					   double maxF = 60;	// forza massima
-					   double maxA = 1.5708;
-					   double minV = 0;
-					   double maxV = 75;
-//					   double d_minA = -0.031416;
-					   double d_minA = 0;
-					   double d_maxA = 0.031416;
-//					   double d_minF = -5;
-					   double d_minF = 0;
-					   double d_maxF = 5;
-					   
-					   double a = 0;
-					   double F = 15;
-					   
-					   in[0] = rx.nextDouble();
-					   in[1] = ry.nextDouble();
-					   in[2] = v;
-					   in[3] = a;
-					   in[4] = F;
-					   
-					   tgt[count][0] = in[0];
-					   tgt[count][1] = in[1];
-					   tgt[count][2] = in[2];
-					   tgt[count][3] = in[3];
-					   tgt[count][4] = in[4];
-					   tgt[count][5] = massa;
-					   
-					   for (int i = 0; i<50; i++)
-					   {
-						   current_time += delta_t;
-						   
-						   // load sensor   
-						   _net.load_sensors(in);
-						   
-						   if (EnvConstant.ACTIVATION_PERIOD == EnvConstant.MANUAL)
-						   {
-							   for (int relax = 0; relax < EnvConstant.ACTIVATION_TIMES; relax++)
-							   {
-								   success = _net.activate();
-							   }
-						   }
-						   else
-						   {   	            
-							   //first activation from sensor to next layer....
-							 success = _net.activate();
-							 
-						  // next activation while last level is reached !
-						  // use depth to ensure relaxation
-							 for (int relax = 0; relax <= net_depth; relax++)
-							 {
-								 success = _net.activate();
-							 }
-						   }
-						   
-						   //output
-						   for( int j=0; j < EnvConstant.NR_UNIT_OUTPUT; j++)
-						   {
-							   out[count][j] = ((NNode) _net.getOutputs().elementAt(j)).getActivation();
-						   }
-						   
-						   // clear net		 
-						   _net.flush();
-						   
-						   double delta_a = d_minA + out[count][0]*d_maxA;
-						   double delta_F = d_minF + out[count][1]*d_maxF;
-						   double lascia = out[count][2];
-						   
-						   a += delta_a;
-						   F += delta_F;
-						   
-						   double acc = F/massa;
-						   double delta_v = acc*delta_t;
-						   
-						   v += delta_v;
-						   
-						   double V = (v - minV)/maxV;
-						   double A = (a)/maxA;
-						   double Freal = (F -minF)/maxF;
-						   
-						   in[2] = V;
-						   in[3] = A;
-						   in[4] = Freal;
-						   tgt[count][2] = v;
-						   tgt[count][3] = a;
-						   tgt[count][4] = F;
-						   
-//						   double x_tgt = minX + tgt[count][0]*maxX;
-//						   double y_tgt = minY + tgt[count][1]*maxY;
-//						   
-//						   x_tgt++;
-//						   
-//						   double X = (x_tgt - minX)/maxX;
-//						   
-//						   in[0] = X;
-//						   tgt[count][0] = in[0];
-						   
-						   if (lascia >= 0.5) 
-						   {
-							   break;
-						   }
-					   }
-					   
-					   
-			 ///IMPLEMENTAZIONE VECCHIA  				   
-//					   
-////				   in[0] = inputX[count];
-////				   in[1] = inputY[count];
-//				   in[0] = rx.nextDouble();
-//				   in[1] = ry.nextDouble();
-//				   in[2] = rm.nextDouble();
-//				   //in[2] = rm.nextDouble();
-////				   in[0] = NeatRoutine.randfloat();
-////				   in[1] = NeatRoutine.randfloat();
-//				   tgt[count][0] = in[0];
-//				   tgt[count][1] = in[1];
-//				   tgt[count][2] = in[2];
-//				   //tgt[count][2] = in[2];
-//
-////				   System.out.println("------ LANCIO: "+count+" ------");
-////				   System.out.println("INPUT 0:"+in[0]);
-////				   System.out.println("INPUT 1:"+in[1]);
-//				   // load sensor   
-//					  _net.load_sensors(in);
-//				   /*
-//				   // activate net	  
-//				   success = _net.activate();
-//				   
-//				   // next activation while last level is reached !
-//				   // use depth to ensure relaxation
-//				   
-//				   for (int relax = 0; relax <= net_depth; relax++)
-//					success = _net.activate();
-//				   */
-//				   
-//					  if (EnvConstant.ACTIVATION_PERIOD == EnvConstant.MANUAL)
-//					  {
-//						 for (int relax = 0; relax < EnvConstant.ACTIVATION_TIMES; relax++)
-//						 {
-//							success = _net.activate();
-//						 }
-//					  }
-//					  else
-//					  {   	            
-//					  // first activation from sensor to next layer....
-////						  System.out.println("LANCIO "+count);
-//						 success = _net.activate();
-//						 
-//					  // next activation while last level is reached !
-//					  // use depth to ensure relaxation
-//						 for (int relax = 0; relax <= net_depth; relax++)
-//						 {
-//							success = _net.activate();
-//						 }
-//					  }
-//				   
-//				   
-//				   
-//				   // for each sample save each output	
-//					   
-////					   System.out.println("INPUT X: " +inputX[count]);
-////					   System.out.println("INPUT Y: "+inputY[count]);
-////					  for( int j=0; j < EnvConstant.NR_UNIT_OUTPUT; j++){
-////						  out[count][j] = ((NNode) _net.getOutputs().elementAt(j)).getActivation();
-//////						  System.out.println(fmt6d.format(out[count][j]));
-//////						  System.out.println();
-////					  }
-//		
-//				   // for each sample save each output	
-////					  System.out.println("ESEMPIO NUMERO: "+count);
-//					  for( int j=0; j < EnvConstant.NR_UNIT_OUTPUT; j++)
-//					  {
-//						 out[count][j] = ((NNode) _net.getOutputs().elementAt(j)).getActivation();
-////						 System.out.println(out[count][j]);
-//					  }
-////					  double o1 = ((NNode) _net.getOutputs().elementAt(0)).getActivation();
-////					  double o2 = ((NNode) _net.getOutputs().elementAt(1)).getActivation();
-////					  out[count][0] = o1;
-////					  out[count][1] = o2;
-////				  System.out.println(fmt6d.format(o1));
-////				  System.out.println(fmt6d.format(o2));
-////				  System.out.println();
-//						 
-//					  
-//				   
-//				   // clear net		 
-//					  _net.flush();
-				   }
-				} 
-				
-					catch (Exception e2) 
-				   {
-					  System.out.print("\n Error generic in Generation.input signal : err-code = \n" + e2); 
-					  System.out.print("\n re-run this application when the class is ready\n\t\t thank! "); 
-					  System.exit(8);
-				   
-				   }
-			 
-			 }  
-		  
-		  //success = true;
-		  
-		  
-		  // control the result 
-			 if (success) 
-			 {
-				try 
-				{
-				   if (EnvConstant.TYPE_OF_SIMULATION == EnvConstant.SIMULATION_FROM_CLASS)
-				   {
-				   
-				   
-				   // prima di passare a calcolare il fitness legge il tgt da ripassare
-				   // al chiamante;
-					  //int plist_tgt[] = new int[2];
-					  //Class [] params_tgt = {int[].class};
-					  //Object[] paramsObj_tgt = new Object[] {plist_tgt};
-//					   Class [] params_tgt = {double.class};
-//					   Object[] paramsObj_tgt = new Object[] {y};
-					   
-			//	   System.out.println(EnvConstant.NUMBER_OF_SAMPLES);
-					  for (count = 0; count < EnvConstant.NUMBER_OF_SAMPLES; count++) 
-					  {
-					  //					 System.out.print("\n sample : "+count);
-					  
-						 //plist_tgt[0] = count;
-//						  y=inputY[count];
-//						 for (int j = 0; j < EnvConstant.NR_UNIT_OUTPUT; j++)
-//						 {
-//							//plist_tgt[1] = j;
-//							Method_tgt = Class_tgt.getMethod("getTarget", params_tgt);
-//							ObjRet_tgt = Method_tgt.invoke(ObjClass_tgt, paramsObj_tgt);
-//							double v1 = Double.parseDouble(ObjRet_tgt.toString());
-//						 //						System.out.print(" ,  o["+j+"] = "+v1);
-//							//tgt[count][j] = v1;
-//							tgt[count] = v1;
-//						 }
-//						 tgt[count][0] = inputX[count];
-//						 tgt[count][1] = inputY[count];
-	 					 
-					  }
-
-				   }
-				//System.out.println(Class_fit);
-				   Method_fit = Class_fit.getMethod("computeFitness", params);
-				   ObjRet_fit = Method_fit.invoke(ObjClass_fit, paramsObj);
-				   //System.out.println(ObjRet_fit);
-//				   fit_dyn = Array.getDouble(ObjRet_fit, 0);
-//				   err_dyn = Array.getDouble(ObjRet_fit, 1);
-//				   win_dyn = Array.getDouble(ObjRet_fit, 2);
-//				   angle = Array.getDouble(ObjRet_fit, 3);
-//				   velocity = Array.getDouble(ObjRet_fit, 4);
-//				   y_target = Array.getDouble(ObjRet_fit, 5);
-//				   x_target = Array.getDouble(ObjRet_fit, 6);
-				   HashMap<Integer,ArrayList<Double>> mappa = (HashMap<Integer, ArrayList<Double>>) ObjRet_fit;
-				   ArrayList<Double> arrayBest = mappa.get(EnvConstant.NUMBER_OF_SAMPLES);
-				   fit_dyn = arrayBest.get(MyConstants.FITNESS_TOTALE_INDEX);
-				   err_dyn = arrayBest.get(MyConstants.ERRORE_INDEX);
-				   win_dyn = arrayBest.get(MyConstants.WIN_INDEX);
-				   angle = arrayBest.get(MyConstants.ANGOLO_INDEX);
-				   velocity = arrayBest.get(MyConstants.VELOCITA_INDEX);
-				   y_target = arrayBest.get(MyConstants.Y_TARGET_INDEX);
-				   x_target = arrayBest.get(MyConstants.X_TARGET_INDEX);
-				   total_err = arrayBest.get(MyConstants.ERRORE_TOTALE_INDEX);
-				   map = mappa;
-				//			   System.out.print("\n ce so passo!");
-				
-
-				} 
-				
-					catch (Exception e3) 
-				   {
-					  System.out.print("\n Error generic in Generation.success : err-code = \n" + e3); 
-					  System.out.print("\n re-run this application when the class is ready\n\t\t thank! "); 
-					  System.exit(8);
-				   }
-			 
-				organism.setFitness(fit_dyn);
-				organism.setError(err_dyn);
-				organism.setTotalError(total_err);
-				organism.setAngle(angle);
-				organism.setVelocity(velocity);
-				organism.setYTarget(y_target);
-				organism.setXTarget(x_target);
-				organism.setMap(map);
-			 } 
-			 
-			 
-			 else 
-			 {
-				errorsum = 999.0;
-				organism.setFitness(0.001);
-				organism.setError(errorsum);
-				organism.setAngle(0.0);
-				organism.setVelocity(0.0);
-				organism.setYTarget(0.0);
-			 }
-
-		  
-			 if (win_dyn == 1.0) 
-			 {
-				organism.setWinner(true);
-				return true;
-			 } 
-		  
-			 if (win_dyn == 2.0) 
-			 {
-				organism.setWinner(true);
-				EnvConstant.SUPER_WINNER_ = true;
-				return true;
-			 } 
-		  
-			 organism.setWinner(false);
-			 return false;
-		  }
 	   
 	   public boolean[] getOtherSettingsValues()
 	   {

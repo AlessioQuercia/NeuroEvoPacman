@@ -30,10 +30,10 @@ import javax.swing.JPanel;
 import common.MyConstants;
 import jNeatCommon.EnvConstant;
 import jneat.Organism;
-import newGui.DisplayPanel;
-import newGui.PacmanGame;
 import newGui.infra.Display;
 import newGui.infra.Game;
+import pacmanGui.DisplayPanel;
+import pacmanGui.PacmanGame;
 
 public class EvolutionPanel extends JPanel implements ActionListener, KeyListener
 {

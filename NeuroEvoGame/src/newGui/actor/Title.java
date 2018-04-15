@@ -1,10 +1,11 @@
 package newGui.actor;
 
 
-import newGui.PacmanActor;
-import newGui.PacmanGame;
-import newGui.PacmanGame.State;
 import newGui.infra.Keyboard;
+import pacmanGui.PacmanActor;
+import pacmanGui.PacmanGame;
+import pacmanGui.PacmanGame.State;
+
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 

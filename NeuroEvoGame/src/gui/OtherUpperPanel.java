@@ -77,7 +77,7 @@ public class OtherUpperPanel extends JPanel
 		
 		values = new boolean[length];
 		
-		filename = MyConstants.COMPUTER_DIR + MyConstants.OTHER_SETTINGS;
+		filename = MyConstants.DATA_DIR + MyConstants.OTHER_SETTINGS;
 		
 		loadSettings(filename);
 		

@@ -5,9 +5,12 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+
+import org.joml.Vector2d;
 
 /**
  * Actor class.
@@ -20,7 +23,7 @@ public class Actor<T extends Game> {
     
     public T game;
     public double x, y;
-    public boolean visible;
+	public boolean visible;
     public BufferedImage frame;
     public BufferedImage[] frames;
     public Rectangle collider; 

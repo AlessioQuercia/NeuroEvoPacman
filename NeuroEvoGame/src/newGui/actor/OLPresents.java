@@ -1,10 +1,11 @@
 package newGui.actor;
 
 
-import newGui.PacmanActor;
-import newGui.PacmanGame;
-import newGui.PacmanGame.State;
 import java.awt.Graphics2D;
+
+import pacmanGui.PacmanActor;
+import pacmanGui.PacmanGame;
+import pacmanGui.PacmanGame.State;
 
 /**
  * OLPresents class.
@@ -70,10 +71,10 @@ public class OLPresents extends PacmanActor {
     @Override
     public void stateChanged() {
         visible = false;
-        if (game.state == State.OL_PRESENTS) {
-            visible = true;
-            textIndex = 0;
-        }
+//        if (game.state == State.OL_PRESENTS) {
+//            visible = true;
+//            textIndex = 0;
+//        }
     }
         
 }
