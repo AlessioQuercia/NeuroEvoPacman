@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 
 import org.joml.Vector2d;
 
+import common.Direction;
 import common.MyConstants;
 import newGui.infra.Display;
 import newGui.infra.Game;
@@ -101,9 +102,9 @@ public class DisplayPanel extends JPanel
         game.update();
     }
     
-    public void reproduceSimulatedGame(int timestep, Map<Integer, Vector2d> pacmanPositions, ArrayList<HashMap<Integer, Vector2d>> ghostsPositions)
+    public void reproduceSimulatedGame(int timestep, Map<Integer, Direction> pacmanDirections, ArrayList<HashMap<Integer, Integer>> ghostsDirections, ArrayList<HashMap<Integer, Integer>> ghostsDesiredDirections)
     {
-    	game.reproduceSimulatedGame(timestep, pacmanPositions, ghostsPositions);
+    	game.reproduceSimulatedGame(timestep, pacmanDirections, ghostsDirections, ghostsDesiredDirections);
     }
     
     public PacmanGame getGame()

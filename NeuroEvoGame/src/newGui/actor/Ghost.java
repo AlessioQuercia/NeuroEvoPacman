@@ -558,7 +558,7 @@ public class Ghost extends PacmanActor {
 		 updateAnimation();
 	}
 	
-    public void reproduceSimulatedMove(int timestep, HashMap<Integer, Vector2d> positions)
+    public void reproduceSimulatedMove(int timestep, HashMap<Integer, Integer> directions, HashMap<Integer, Integer> desiredDirs)
     {
         switch (game.getState()) 
         {
@@ -567,12 +567,130 @@ public class Ghost extends PacmanActor {
 //	        case TITLE: updateTitle(); break;
 	        case READY: updateReady(); break;
 	        case READY2: updateReady2(); break;
-	        case PLAYING: updatePlayingReproduced(timestep, positions); break;
+	        case PLAYING: updatePlaying(directions.get(timestep), desiredDirs.get(timestep)); break;
 	        case PACMAN_DIED: updatePacmanDied(); break;
 	        case GHOST_CATCHED: updateGhostCatched(); break;
 	        case LEVEL_CLEARED: updateLevelCleared(); break;
 	        case GAME_OVER: updateGameOver(); break;
         }
 	}
+    
+    public void updatePlaying(int dir, int desiredDir) {
+        switch (mode) {
+            case CAGE: updateGhostCage(); break;
+            case NORMAL: updateGhostNormal(dir, desiredDir); break;
+            case VULNERABLE: updateGhostVulnerable(dir, desiredDir); break;
+            case DIED: updateGhostDied(); break;
+        }
+        updateAnimation();
+    }
+    
+    private void updateGhostMovement(int dir, int desiredDir, boolean useTarget, int targetCol, int targetRow
+            , int velocity, Runnable collisionWithPacmanAction, int ... desiredDirectionsMap) {
         
+        desiredDirections.clear();
+        if (useTarget) {
+            if (targetCol - col > 0) {
+                desiredDirections.add(desiredDirectionsMap[0]);
+            }
+            else if (targetCol - col < 0) {
+                desiredDirections.add(desiredDirectionsMap[2]);
+            }
+            if (targetRow - row > 0) {
+                desiredDirections.add(desiredDirectionsMap[1]);
+            }
+            else if (targetRow - row < 0) {
+                desiredDirections.add(desiredDirectionsMap[3]);
+            }
+        }
+        if (desiredDirections.size() > 0) {
+            desiredDirection = desiredDir;
+        }
+        
+        yield:
+        while (true) {
+            switch (instructionPointer) {
+                case 0:
+                    if ((row == 14 && col == 1 && lastDirection == 2) 
+                            || (row == 14 && col == 34 && lastDirection == 0)) {
+                        adjustHorizontalOutsideMovement();
+                    }
+                    
+                    double angle = Math.toRadians(desiredDirection * 90);
+                    dx = (int) Math.cos(angle);
+                    dy = (int) Math.sin(angle);
+                    if (useTarget && game.maze[row + dy][col + dx] == 0
+                            && desiredDirection != backwardDirections[lastDirection]) {
+                        
+                        direction = desiredDirection;
+                    }
+                    else {
+                    	
+                        direction = dir;
+                        angle = Math.toRadians(direction * 90);
+                        dx = (int) Math.cos(angle);
+                        dy = (int) Math.sin(angle);
+                    }
+                    
+                    col += dx;
+                    row += dy;
+                    instructionPointer = 1;
+                case 1:
+                    if (!moveToGridPosition(col, row, velocity)) {
+                        lastDirection = direction;
+                        instructionPointer = 0;
+                        // adjustHorizontalOutsideMovement();
+                    }
+                    if (collisionWithPacmanAction != null && checkCollisionWithPacman()) {
+                        collisionWithPacmanAction.run();
+                    }
+                    break yield;
+            }
+        }        
+    }
+    
+    private void updateGhostNormal(int dir, int desiredDir) {
+        if (checkVulnerableModeTime() && markAsVulnerable) {
+            setMode(Mode.VULNERABLE);
+            markAsVulnerable = false;
+        }
+        
+        // for debbuging purposes
+//        if (Keyboard.keyPressed[KeyEvent.VK_Q] && type == 0) {
+//            game.currentCatchedGhostScoreTableIndex = 0;
+//            game.ghostCatched(Ghost.this);
+//        }
+//        else if (Keyboard.keyPressed[KeyEvent.VK_W] && type == 1) {
+//            game.currentCatchedGhostScoreTableIndex = 0;
+//            game.ghostCatched(Ghost.this);
+//        }
+//        else if (Keyboard.keyPressed[KeyEvent.VK_E] && type == 2) {
+//            game.currentCatchedGhostScoreTableIndex = 0;
+//            game.ghostCatched(Ghost.this);
+//        }
+//        else if (Keyboard.keyPressed[KeyEvent.VK_R] && type == 3) {
+//            game.currentCatchedGhostScoreTableIndex = 0;
+//            game.ghostCatched(Ghost.this);
+//        }
+        
+        if (type == 0 || type == 1) {
+            updateGhostMovement(dir, desiredDir, true, pacman.col, pacman.row, 1, pacmanCatchedAction, 0, 1, 2, 3); // chase movement
+        }
+        else {
+            updateGhostMovement(dir, desiredDir, false, 0, 0, 1, pacmanCatchedAction, 0, 1, 2, 3); // random movement
+        }
+//        System.out.println("COL: " + col + " ROW: " + row + " VALORE: " + game.maze[row][col]);
+    }
+    
+    private void updateGhostVulnerable(int dir, int desiredDir) {
+        if (markAsVulnerable) {
+            markAsVulnerable = false;
+        }
+        
+        updateGhostMovement(dir, desiredDir, true, pacman.col, pacman.row, 1, ghostCatchedAction, 2, 3, 0, 1); // run away movement
+        // return to normal mode after 8 seconds
+        if (!checkVulnerableModeTime()) {
+            setMode(Mode.NORMAL);
+        }
+    }        
 }

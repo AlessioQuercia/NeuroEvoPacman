@@ -184,19 +184,15 @@ public class Pacman extends PacmanActor {
         
         if (dir == Direction.LEFT) {
             desiredDirection = 2;
-            System.out.println("LEFT");
         }
         else if (dir == Direction.RIGHT) {
             desiredDirection = 0;
-            System.out.println("RIGHT");
         }
         else if (dir == Direction.UP) {
             desiredDirection = 3;
-            System.out.println("UP");
         }
         else if (dir == Direction.DOWN) {
             desiredDirection = 1;
-            System.out.println("DOWN");
         }
         
         yield:
@@ -334,7 +330,7 @@ public class Pacman extends PacmanActor {
 		return row;
 	}
 	
-    public void reproduceSimulatedMove(int timestep, Map<Integer, Vector2d> positions)
+    public void reproduceSimulatedMove(int timestep, Map<Integer, Direction> directions)
     {
         switch (game.getState()) 
         {
@@ -343,7 +339,7 @@ public class Pacman extends PacmanActor {
 //	        case TITLE: updateTitle(); break;
 	        case READY: updateReady(); break;
 	        case READY2: updateReady2(); break;
-	        case PLAYING: updatePlayingReproduced(timestep, positions); break;
+	        case PLAYING: updatePlaying(directions.get(timestep)); break;
 	        case PACMAN_DIED: updatePacmanDied(); break;
 	        case GHOST_CATCHED: updateGhostCatched(); break;
 	        case LEVEL_CLEARED: updateLevelCleared(); break;

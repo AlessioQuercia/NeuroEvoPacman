@@ -93,19 +93,19 @@ public class Game{
 		this.screenScale = screenScale;
 	}
 
-	public void reproduceSimulatedGame(int timestep, Map<Integer, Vector2d> pacmanPositions, ArrayList<HashMap<Integer, Vector2d>> ghostsPositions)
+	public void reproduceSimulatedGame(int timestep, Map<Integer, Direction> pacmanDirections, ArrayList<HashMap<Integer, Integer>> ghostsDirections, ArrayList<HashMap<Integer, Integer>> ghostsDesiredDirections)
 	{
         for (Actor actor : actors) 
         {
         	if (actor instanceof Pacman)
         	{
         		Pacman p = (Pacman) actor;
-        		p.reproduceSimulatedMove(timestep, pacmanPositions);
+        		p.reproduceSimulatedMove(timestep, pacmanDirections);
         	}
         	else if (actor instanceof Ghost)
         	{
         		Ghost g = (Ghost) actor;
-        		g.reproduceSimulatedMove(timestep, ghostsPositions.get(g.type));
+        		g.reproduceSimulatedMove(timestep, ghostsDirections.get(g.type), ghostsDesiredDirections.get(g.type));
         	}
         	else
         		actor.update();

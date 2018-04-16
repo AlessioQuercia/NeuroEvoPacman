@@ -40,6 +40,7 @@ import javax.swing.text.Document;
 
 import org.joml.Vector2d;
 
+import common.Direction;
 import common.MyConstants;
 import experiment.OrganismRunnablePacMan;
 import experiment.evo_fit;
@@ -59,6 +60,7 @@ import jneat.Population;
 import jneat.Species;
 import log.HistoryLog;
 import pacmanGui.PacmanGame;
+import pacmanGui.PacmanGame.State;
 
 public class MainPanel extends JPanel implements Runnable
 {
@@ -256,6 +258,10 @@ private boolean done;
         Map<Integer, Vector2d> pacmanPositions = null;
         ArrayList<HashMap<Integer, Vector2d>> ghostsPositions = null;
         
+        Map<Integer, Direction> pacmanDirections = null;
+        ArrayList<HashMap<Integer, Integer>> ghostsDirections = null;
+        ArrayList<HashMap<Integer, Integer>> ghostsDesiredDirections = null;
+        
         boolean gameStarted = false;
 		
 		while (isRunning)
@@ -290,6 +296,12 @@ private boolean done;
 	                
 	                ghostsPositions = selectedOrg.getGhostsPositions();
 	                
+	                pacmanDirections = selectedOrg.getPacmanDirections();
+	                
+	                ghostsDirections = selectedOrg.getGhostsDirections();
+	                
+	                ghostsDesiredDirections = selectedOrg.getGhostsDesiredDirections();
+	                
 	                if (timestep >= selectedOrg.getGhostsPositions().get(0).size())
 	                {
 	                	timestep = 0;
@@ -302,9 +314,21 @@ private boolean done;
 	                	evolution.getRightPanel().getGame().startGame();
 	                }
 	                
-	                evolution.getRightPanel().reproduceSimulatedGame(timestep, pacmanPositions, ghostsPositions);	// REPRODUCE THE SIMULATED GAME
+//	                System.out.println("TIMESTEP: " + timestep + "\n" + 
+//	                					"GHOST1_DIR: " + ghostsDirections.get(0).get(timestep));
 	                
-	                timestep++;
+	                if (evolution.getRightPanel().getGame().state == State.PLAYING)
+	                {
+		                evolution.getRightPanel().getGame().update(pacmanDirections.get(timestep));
+		                
+	//	                evolution.getRightPanel().reproduceSimulatedGame(timestep, pacmanDirections, ghostsDirections, ghostsDesiredDirections);	// REPRODUCE THE SIMULATED GAME
+		                
+		                timestep++;
+	                }
+	                else
+	                {
+	                	evolution.getRightPanel().getGame().update();
+	                }
 	                
 	                needsRender = true;
 	            }

@@ -27,6 +27,9 @@ public class OrganismRunnablePacMan implements Runnable
 	
 	private Map<Integer, Vector2d> pacmanPositions;
 	private ArrayList<HashMap<Integer, Vector2d>> ghostsPositions;
+	private Map<Integer, Direction> pacmanDirections;
+	private ArrayList<HashMap<Integer, Integer>> ghostsDirections;
+	private ArrayList<HashMap<Integer, Integer>> ghostsDesiredDirections;
 	
 	// dynamic definition for fitness
 		  Class  Class_fit;
@@ -41,6 +44,11 @@ public class OrganismRunnablePacMan implements Runnable
 		
 		this.pacmanPositions = new HashMap<Integer, Vector2d> ();
 		this.ghostsPositions = new ArrayList<HashMap<Integer, Vector2d>>();
+		
+		this.pacmanDirections = new HashMap<Integer, Direction> ();
+		this.ghostsDirections = new ArrayList<HashMap<Integer, Integer>> ();
+		this.ghostsDesiredDirections = new ArrayList<HashMap<Integer, Integer>> ();
+		
 		
 		Class_fit = evo_fit.class; //Class.forName(EnvConstant.CLASS_FITNESS);
 		try {
@@ -166,18 +174,47 @@ public class OrganismRunnablePacMan implements Runnable
 					 int minRows = 0;
 					 int minCols = 0;
 					   
-					   
-				   game.state = State.PLAYING;
-					 
 				   for (count = 0; count < EnvConstant.NUMBER_OF_SAMPLES; count++) 
 				   {   
 					   ///IMPLEMENTAZIONE DECISIONE DIREZIONE   
 					   
+					   HashMap<Integer, Vector2d> ghost1 = new HashMap<Integer, Vector2d>();
+					   HashMap<Integer, Vector2d> ghost2 = new HashMap<Integer, Vector2d>();
+					   HashMap<Integer, Vector2d> ghost3 = new HashMap<Integer, Vector2d>();
+					   HashMap<Integer, Vector2d> ghost4 = new HashMap<Integer, Vector2d>();
+					   ghostsPositions.add(ghost1);
+					   ghostsPositions.add(ghost2);
+					   ghostsPositions.add(ghost3);
+					   ghostsPositions.add(ghost4);
+					   
+					   HashMap<Integer, Integer> ghost1d = new HashMap<Integer, Integer>();
+					   HashMap<Integer, Integer> ghost2d = new HashMap<Integer, Integer>();
+					   HashMap<Integer, Integer> ghost3d = new HashMap<Integer, Integer>();
+					   HashMap<Integer, Integer> ghost4d = new HashMap<Integer, Integer>();
+					   ghostsDirections.add(ghost1d);
+					   ghostsDirections.add(ghost2d);
+					   ghostsDirections.add(ghost3d);
+					   ghostsDirections.add(ghost4d);
+					   
+					   HashMap<Integer, Integer> ghost1dd = new HashMap<Integer, Integer>();
+					   HashMap<Integer, Integer> ghost2dd = new HashMap<Integer, Integer>();
+					   HashMap<Integer, Integer> ghost3dd = new HashMap<Integer, Integer>();
+					   HashMap<Integer, Integer> ghost4dd = new HashMap<Integer, Integer>();
+					   ghostsDesiredDirections.add(ghost1dd);
+					   ghostsDesiredDirections.add(ghost2dd);
+					   ghostsDesiredDirections.add(ghost3dd);
+					   ghostsDesiredDirections.add(ghost4dd);
+					   
 					   int total_time = 0;
 					   int perLive_time = 0;
 					   
+					   game.startGame();
+					   
 					   while (game.getLives() > 0)
 					   {
+						   while (game.state != State.PLAYING)
+							   game.update();
+						   
 						   perLive_time = 0;
 						   // PARAMETRI IN INPUT DA NORMALIZZARE!!!
 						   
@@ -214,20 +251,12 @@ public class OrganismRunnablePacMan implements Runnable
 						   tgt[count][11] = in[11];
 						   
 						   pacmanPositions.put(total_time, new Vector2d(game.getPacMan().row, game.getPacMan().col));
-						   HashMap<Integer, Vector2d> ghost1 = new HashMap<Integer, Vector2d>();
-						   HashMap<Integer, Vector2d> ghost2 = new HashMap<Integer, Vector2d>();
-						   HashMap<Integer, Vector2d> ghost3 = new HashMap<Integer, Vector2d>();
-						   HashMap<Integer, Vector2d> ghost4 = new HashMap<Integer, Vector2d>();
 						   ghost1.put(total_time, new Vector2d(game.getGhosts().get(0).row, game.getGhosts().get(0).col));
 						   ghost2.put(total_time, new Vector2d(game.getGhosts().get(1).row, game.getGhosts().get(1).col));
 						   ghost3.put(total_time, new Vector2d(game.getGhosts().get(2).row, game.getGhosts().get(2).col));
 						   ghost4.put(total_time, new Vector2d(game.getGhosts().get(3).row, game.getGhosts().get(3).col));
-						   ghostsPositions.add(ghost1);
-						   ghostsPositions.add(ghost2);
-						   ghostsPositions.add(ghost3);
-						   ghostsPositions.add(ghost4);
 						   
-						   System.out.println("PACMAN_LIVES: " + game.getLives());
+//						   System.out.println("PACMAN_LIVES: " + game.getLives());
 
 						   while (game.getState() != State.PACMAN_DIED)
 						   {
@@ -269,7 +298,7 @@ public class OrganismRunnablePacMan implements Runnable
 							   
 							   Direction direction = Direction.getDirection(dir);
 							   
-							   System.out.println(direction);
+//							   System.out.println(direction);
 							   
 							   // EFFETTUARE LA MOSSA SCELTA DALLA RETE E UNA MOSSA PER OGNI GHOST (UN PASSO T)
 							   
@@ -319,6 +348,20 @@ public class OrganismRunnablePacMan implements Runnable
 							   ghost2.put(total_time, new Vector2d(game.getGhosts().get(1).row, game.getGhosts().get(1).col));
 							   ghost3.put(total_time, new Vector2d(game.getGhosts().get(2).row, game.getGhosts().get(2).col));
 							   ghost4.put(total_time, new Vector2d(game.getGhosts().get(3).row, game.getGhosts().get(3).col));
+							   
+							   pacmanDirections.put(total_time, direction);
+							   
+							   ghostsDirections.get(0).put(total_time, game.getGhosts().get(0).direction);
+							   ghostsDirections.get(1).put(total_time, game.getGhosts().get(1).direction);
+							   ghostsDirections.get(2).put(total_time, game.getGhosts().get(2).direction);
+							   ghostsDirections.get(3).put(total_time, game.getGhosts().get(3).direction);
+							   
+							   ghostsDesiredDirections.get(0).put(total_time, game.getGhosts().get(0).desiredDirection);
+							   ghostsDesiredDirections.get(1).put(total_time, game.getGhosts().get(1).desiredDirection);
+							   ghostsDesiredDirections.get(2).put(total_time, game.getGhosts().get(2).desiredDirection);
+							   ghostsDesiredDirections.get(3).put(total_time, game.getGhosts().get(3).desiredDirection);
+							   
+//						       System.out.println("COL: " + game.getGhosts().get(0).col + " ROW: " + game.getGhosts().get(0).row + " VALORE: " + game.maze[game.getGhosts().get(0).row][game.getGhosts().get(0).col]);
 							   
 							   // AGGIORNAMENTO DEL TEMPO PER_VITA (TEMPO INTESO COME PASSI)
 							   perLive_time++; 
@@ -384,7 +427,7 @@ public class OrganismRunnablePacMan implements Runnable
 //				   x_target = Array.getDouble(ObjRet_fit, 6);
 				   HashMap<Integer,ArrayList<Double>> mappa = (HashMap<Integer, ArrayList<Double>>) ObjRet_fit;
 				   ArrayList<Double> arrayBest = mappa.get(EnvConstant.NUMBER_OF_SAMPLES);
-				   fit_dyn = 100 + Integer.parseInt(game.getScore());//arrayBest.get(MyConstants.FITNESS_TOTALE_INDEX);
+				   fit_dyn = Integer.parseInt(game.getScore());//arrayBest.get(MyConstants.FITNESS_TOTALE_INDEX);
 				   
 //				   System.out.println(fit_dyn);
 				   
@@ -418,6 +461,9 @@ public class OrganismRunnablePacMan implements Runnable
 				organism.setMap(map);
 				organism.setPacmanPositions(pacmanPositions);
 				organism.setGhostsPositions(ghostsPositions);
+				organism.setPacmanDirections(pacmanDirections);
+				organism.setGhostsDirections(ghostsDirections);
+				organism.setGhostsDesiredDirections(ghostsDesiredDirections);
 			 } 
 			 
 			 
