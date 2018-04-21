@@ -55,7 +55,7 @@ public class MyConstants
 	public static String RESULTS_DIR = "C:/Users/Alessio/Desktop/results/";
 	public static String POPULATIONS_DIR = "C:/Users/Alessio/Desktop/populations/";
 	public static String PARAMETRI_NOMEFILE = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\NeuroEvoGame\\src\\gui\\data\\parameters";
-	public static String GENOMA_NOMEFILE = DATA_DIR + "pacman_12x0x1";
+	public static String GENOMA_NOMEFILE = DATA_DIR + "pacman_12x0x4";
 	public static String POP_NOMEFILE = DATA_DIR + "primitive";
 	public static String POPULATION_FILENAME = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\NeuroEvoGame\\src\\gui\\data\\population_0";
 	

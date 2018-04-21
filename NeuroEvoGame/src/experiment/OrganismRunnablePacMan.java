@@ -173,7 +173,7 @@ public class OrganismRunnablePacMan implements Runnable
 					 int maxCols = 30;
 					 int minRows = 0;
 					 int minCols = 0;
-					   
+					 
 				   for (count = 0; count < EnvConstant.NUMBER_OF_SAMPLES; count++) 
 				   {   
 					   ///IMPLEMENTAZIONE DECISIONE DIREZIONE   
@@ -212,10 +212,19 @@ public class OrganismRunnablePacMan implements Runnable
 					   
 					   while (game.getLives() > 0)
 					   {
+						   
 						   while (game.state != State.PLAYING)
+						   {
 							   game.update();
+							   if (game.getLives() == 0)
+								   break;
+						   }
+						   
+						   if (game.lives == 0)
+							   break;
 						   
 						   perLive_time = 0;
+						   
 						   // PARAMETRI IN INPUT DA NORMALIZZARE!!!
 						   
 						   
@@ -224,18 +233,18 @@ public class OrganismRunnablePacMan implements Runnable
 //						   in[5] = (game.getPacMan().getRow() - minRows)/maxRows; // CONVERSIONE DA VALORE TRA MIN E MAX A VALORE TRA 0 E 1
 						   
 						   
-						   in[0] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_X = PACMAN_ROW
-						   in[1] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_Y = PACMAN_COL
-						   in[2] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_X = PACMAN_ROW (AL TEMPO PRECEDENTE)
-						   in[3] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_Y = PACMAN_COL (AL TEMPO PRECEDENTE)
-						   in[4] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_X = GHOST1_ROW
-						   in[5] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_Y = GHOST1_COL
-						   in[6] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_X = GHOST2_ROW
-						   in[7] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_Y = GHOST2_COL
-						   in[8] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_X = GHOST3_ROW
-						   in[9] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_Y = GHOST3_COL
-						   in[10] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_X = GHOST4_ROW
-						   in[11] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_Y = GHOST4_COL
+						   in[0] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL
+						   in[1] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW
+						   in[2] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL (AL TEMPO PRECEDENTE)
+						   in[3] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW (AL TEMPO PRECEDENTE)
+						   in[4] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_X = GHOST1_COl
+						   in[5] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_Y = GHOST1_ROW
+						   in[6] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_X = GHOST2_COl
+						   in[7] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_Y = GHOST2_ROW
+						   in[8] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_X = GHOST3_COL
+						   in[9] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_Y = GHOST3_ROW
+						   in[10] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_X = GHOST4_COL
+						   in[11] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_Y = GHOST4_ROW
 						   
 						   tgt[count][0] = in[0];
 						   tgt[count][1] = in[1];
@@ -257,9 +266,20 @@ public class OrganismRunnablePacMan implements Runnable
 						   ghost4.put(total_time, new Vector2d(game.getGhosts().get(3).row, game.getGhosts().get(3).col));
 						   
 //						   System.out.println("PACMAN_LIVES: " + game.getLives());
+						   
+						   int previousCol[] = new int[4];
+						   int previousRow[] = new int[4];
 
-						   while (game.getState() != State.PACMAN_DIED)
+						   while (game.getState() != State.PACMAN_DIED || game.getState() == State.GHOST_CATCHED)
 						   {
+							   previousCol[0] = game.getGhosts().get(0).col;
+							   previousRow[0] = game.getGhosts().get(0).row;
+							   previousCol[1] = game.getGhosts().get(1).col;
+							   previousRow[1] = game.getGhosts().get(1).row;
+							   previousCol[2] = game.getGhosts().get(2).col;
+							   previousRow[2] = game.getGhosts().get(2).row;
+							   previousCol[3] = game.getGhosts().get(3).col;
+							   previousRow[3] = game.getGhosts().get(3).row;
 //							   System.out.println("PACMAN_COL: " + game.getPacMan().col + " PACMAN_ROW: " + game.getPacMan().row);
 //							   System.out.println("GHOST1_COL: " + game.getGhosts().get(0).col + " GHOST1_ROW: " + game.getGhosts().get(0).row);
 							   // load sensor   
@@ -294,15 +314,38 @@ public class OrganismRunnablePacMan implements Runnable
 							   // clear net		 
 							   _net.flush();
 							   
-							   double dir = out[count][0];
+//							   double dir = Math.max(Math.max(out[count][0], out[count][1]), Math.max(out[count][2], out[count][3]));
+							   double left = out[count][0];
+							   double right = out[count][1];
+							   double up = out[count][2];
+							   double down = out[count][3];
 							   
-							   Direction direction = Direction.getDirection(dir);
+							   Direction direction = Direction.getDirection(left, right, up, down);
 							   
 //							   System.out.println(direction);
 							   
 							   // EFFETTUARE LA MOSSA SCELTA DALLA RETE E UNA MOSSA PER OGNI GHOST (UN PASSO T)
 							   
+//							   Vector2d position0 = new Vector2d(game.getGhosts().get(0).x, game.getGhosts().get(0).y);
+//							   Vector2d position1 = new Vector2d(game.getGhosts().get(1).x, game.getGhosts().get(1).y);
+//							   Vector2d position2 = new Vector2d(game.getGhosts().get(2).x, game.getGhosts().get(2).y);
+//							   Vector2d position3 = new Vector2d(game.getGhosts().get(3).x, game.getGhosts().get(3).y);
+							   
 							   game.update(direction);
+							   
+//							   System.out.println(game.getGhosts().get(0).getTargetCol(-27) + " " + game.getGhosts().get(0).getTargetCol(134));
+//							   System.out.println(game.getGhosts().get(0).getTargetCol(236) + " " + game.getGhosts().get(0).getTargetCol(134));
+//							   System.out.println(game.getGhosts().get(0).getTargetCol(237) + " " + game.getGhosts().get(0).getTargetCol(134));
+//							   System.out.println(game.getGhosts().get(0).getTargetCol(-26) + " " + game.getGhosts().get(0).getTargetCol(134));
+							   
+//						        if (Math.abs(game.getGhosts().get(0).x - position0.x) > 1 || Math.abs(game.getGhosts().get(0).y - position0.y) > 1)
+//						        	System.out.println("WHAT THE FUCK_0 (" + game.getGhosts().get(0).x + ", " + game.getGhosts().get(0).y + ") (" + position0.x + ", " + position0.y + ") " + game.getState());
+//						        if (Math.abs(game.getGhosts().get(1).x - position1.x) > 1 || Math.abs(game.getGhosts().get(1).y - position1.y) > 1)
+//						        	System.out.println("WHAT THE FUCK_1 (" + game.getGhosts().get(1).x + ", " + game.getGhosts().get(1).y + ") (" + position1.x + ", " + position1.y + ") " + game.getState());
+//						        if (Math.abs(game.getGhosts().get(2).x - position2.x) > 1 || Math.abs(game.getGhosts().get(2).y - position2.y) > 1)
+//						        	System.out.println("WHAT THE FUCK_2 (" + game.getGhosts().get(2).x + ", " + game.getGhosts().get(2).y + ") (" + position2.x + ", " + position2.y + ") " + game.getState());
+//						        if (Math.abs(game.getGhosts().get(3).x - position3.x) > 1 || Math.abs(game.getGhosts().get(3).y - position3.y) > 1)
+//						        	System.out.println("WHAT THE FUCK_3 (" + game.getGhosts().get(3).x + ", " + game.getGhosts().get(3).y + ") (" + position3.x + ", " + position3.y + ") " + game.getState());
 							   
 							   // NON BASTA AGGIORNARE SOLO LE MOSSE!!!!!!!!!!!!!
 							   // AGGIORNARE TUTTO IL GIOCO!!!!!!
@@ -316,18 +359,18 @@ public class OrganismRunnablePacMan implements Runnable
 //							   }
 							   
 							   // AGGIORNAMENTO DELLE POSIZIONI
-							   in[0] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_X = PACMAN_ROW
-							   in[1] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_Y = PACMAN_COL
-							   in[2] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_X = PACMAN_ROW (AL TEMPO PRECEDENTE)
-							   in[3] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_Y = PACMAN_COL (AL TEMPO PRECEDENTE)
-							   in[4] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_X = GHOST1_ROW
-							   in[5] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_Y = GHOST1_COL
-							   in[6] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_X = GHOST2_ROW
-							   in[7] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_Y = GHOST2_COL
-							   in[8] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_X = GHOST3_ROW
-							   in[9] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_Y = GHOST3_COL
-							   in[10] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_X = GHOST4_ROW
-							   in[11] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_Y = GHOST4_COL
+							   in[0] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL
+							   in[1] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW
+							   in[2] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL (AL TEMPO PRECEDENTE)
+							   in[3] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW (AL TEMPO PRECEDENTE)
+							   in[4] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_X = GHOST1_COl
+							   in[5] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_Y = GHOST1_ROW
+							   in[6] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_X = GHOST2_COl
+							   in[7] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_Y = GHOST2_ROW
+							   in[8] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_X = GHOST3_COL
+							   in[9] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_Y = GHOST3_ROW
+							   in[10] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_X = GHOST4_COL
+							   in[11] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_Y = GHOST4_ROW
 							   
 							   tgt[count][0] = in[0];
 							   tgt[count][1] = in[1];
@@ -343,11 +386,11 @@ public class OrganismRunnablePacMan implements Runnable
 							   tgt[count][11] = in[11];
 							   
 							   // SALVATAGGIO POSIZIONI RISPETTO AL TEMPO TOTALE
-							   pacmanPositions.put(total_time, new Vector2d(game.getPacMan().row, game.getPacMan().col));
-							   ghost1.put(total_time, new Vector2d(game.getGhosts().get(0).row, game.getGhosts().get(0).col));
-							   ghost2.put(total_time, new Vector2d(game.getGhosts().get(1).row, game.getGhosts().get(1).col));
-							   ghost3.put(total_time, new Vector2d(game.getGhosts().get(2).row, game.getGhosts().get(2).col));
-							   ghost4.put(total_time, new Vector2d(game.getGhosts().get(3).row, game.getGhosts().get(3).col));
+							   pacmanPositions.put(total_time, new Vector2d(game.getPacMan().x, game.getPacMan().y));
+							   ghostsPositions.get(0).put(total_time, new Vector2d(game.getGhosts().get(0).x, game.getGhosts().get(0).y));
+							   ghostsPositions.get(1).put(total_time, new Vector2d(game.getGhosts().get(1).x, game.getGhosts().get(1).y));
+							   ghostsPositions.get(2).put(total_time, new Vector2d(game.getGhosts().get(2).x, game.getGhosts().get(2).y));
+							   ghostsPositions.get(3).put(total_time, new Vector2d(game.getGhosts().get(3).x, game.getGhosts().get(3).y));
 							   
 							   pacmanDirections.put(total_time, direction);
 							   
@@ -361,6 +404,23 @@ public class OrganismRunnablePacMan implements Runnable
 							   ghostsDesiredDirections.get(2).put(total_time, game.getGhosts().get(2).desiredDirection);
 							   ghostsDesiredDirections.get(3).put(total_time, game.getGhosts().get(3).desiredDirection);
 							   
+//							   if (Math.abs(game.getGhosts().get(0).col - previousCol[0]) > 1 || Math.abs(game.getGhosts().get(0).row - previousRow[0]) > 1)
+//								   System.out.println("ERRORE_1 " + game.getGhosts().get(0).col + " vs " + previousCol[0] + " " + game.getGhosts().get(0).row + " vs " + previousRow[0]);
+//							   if (Math.abs(game.getGhosts().get(1).col - previousCol[1]) > 1 || Math.abs(game.getGhosts().get(1).row - previousRow[1]) > 1)
+//								   System.out.println("ERRORE_2 " + game.getGhosts().get(1).col + " vs " + previousCol[1] + " " + game.getGhosts().get(1).row + " vs " + previousRow[1]);
+//							   if (Math.abs(game.getGhosts().get(2).col - previousCol[2]) > 1 || Math.abs(game.getGhosts().get(2).row - previousRow[2]) > 1)
+//								   System.out.println("ERRORE_3 " + game.getGhosts().get(2).col + " vs " + previousCol[2] + " " + game.getGhosts().get(2).row + " vs " + previousRow[2]);
+//							   if (Math.abs(game.getGhosts().get(3).col - previousCol[3]) > 1 || Math.abs(game.getGhosts().get(3).row - previousRow[3]) > 1)
+//								   System.out.println("ERRORE_4 " + game.getGhosts().get(3).col + " vs " + previousCol[3] + " " + game.getGhosts().get(3).row + " vs " + previousRow[3]);
+							   
+//							   if (game.maze[game.getGhosts().get(3).row][game.getGhosts().get(3).col] == -1)
+//								   System.out.println(game.getGhosts().get(3).row + " " + game.getGhosts().get(3).col);
+							   
+//							   System.out.println(game.maze[game.getGhosts().get(0).row][game.getGhosts().get(0).col] == -1);
+//							   System.out.println(game.maze[game.getGhosts().get(1).row][game.getGhosts().get(1).col] == -1);
+//							   System.out.println(game.maze[game.getGhosts().get(2).row][game.getGhosts().get(2).col] == -1);
+//							   System.out.println(game.maze[game.getGhosts().get(3).row][game.getGhosts().get(3).col] == -1);
+							   
 //						       System.out.println("COL: " + game.getGhosts().get(0).col + " ROW: " + game.getGhosts().get(0).row + " VALORE: " + game.maze[game.getGhosts().get(0).row][game.getGhosts().get(0).col]);
 							   
 							   // AGGIORNAMENTO DEL TEMPO PER_VITA (TEMPO INTESO COME PASSI)
@@ -370,9 +430,10 @@ public class OrganismRunnablePacMan implements Runnable
 							   total_time++;
 						   }
 						   
-						   game.init();
-						   game.nextLife();
-						   game.state = State.PLAYING;
+						   
+//						   game.init();
+//						   game.nextLife();
+//						   game.state = State.PLAYING;
 						   
 						   tgt[count][12] = Double.parseDouble(game.getScore());
 					   }
@@ -431,7 +492,7 @@ public class OrganismRunnablePacMan implements Runnable
 				   
 //				   System.out.println(fit_dyn);
 				   
-				   err_dyn = arrayBest.get(MyConstants.ERRORE_INDEX);
+				   err_dyn = Math.pow((3333360 - Integer.parseInt(game.getScore())), 2);//arrayBest.get(MyConstants.ERRORE_INDEX);
 				   win_dyn = arrayBest.get(MyConstants.WIN_INDEX);
 //				   angle = arrayBest.get(MyConstants.ANGOLO_INDEX);
 //				   velocity = arrayBest.get(MyConstants.VELOCITA_INDEX);

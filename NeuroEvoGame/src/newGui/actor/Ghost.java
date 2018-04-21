@@ -85,6 +85,16 @@ public class Ghost extends PacmanActor {
     private int getTargetY(int row) {
         return (row + 3) * 8 - 2;
     }
+    
+    public int getTargetCol(int x)
+    {
+    	return (3 + 32 + x)/8;
+    }
+    
+    public int getTargetRow(int y)
+    {
+    	return (2 + y - 24)/8;
+    }
 
     public void updatePosition() {
         x = getTargetX(col);
@@ -104,6 +114,18 @@ public class Ghost extends PacmanActor {
         int vy = Math.abs(sy) < velocity ? Math.abs(sy) : velocity;
         int idx = vx * (sx == 0 ? 0 : sx > 0 ? 1 : -1);
         int idy = vy * (sy == 0 ? 0 : sy > 0 ? 1 : -1);
+        x += idx;
+        y += idy;
+        return sx != 0 || sy != 0;
+    }
+    
+    private boolean moveToTargetPosition1(int targetX, int targetY, int velocity) {
+        int sx = (int) (targetX - x);
+        int sy = (int) (targetY - y);
+        int vx = velocity;
+        int vy = velocity;
+        int idx = vx * sx;
+        int idy = vy * sy;
         x += idx;
         y += idy;
         return sx != 0 || sy != 0;
@@ -365,7 +387,6 @@ public class Ghost extends PacmanActor {
     
     private void updateGhostMovement(boolean useTarget, int targetCol, int targetRow
             , int velocity, Runnable collisionWithPacmanAction, int ... desiredDirectionsMap) {
-        
         desiredDirections.clear();
         if (useTarget) {
             if (targetCol - col > 0) {
@@ -558,7 +579,7 @@ public class Ghost extends PacmanActor {
 		 updateAnimation();
 	}
 	
-    public void reproduceSimulatedMove(int timestep, HashMap<Integer, Integer> directions, HashMap<Integer, Integer> desiredDirs)
+    public void reproduceSimulatedMove(int timestep, HashMap<Integer, Integer> directions, HashMap<Integer, Integer> desiredDirs, HashMap<Integer, Vector2d> ghostsPositions)
     {
         switch (game.getState()) 
         {
@@ -567,89 +588,111 @@ public class Ghost extends PacmanActor {
 //	        case TITLE: updateTitle(); break;
 	        case READY: updateReady(); break;
 	        case READY2: updateReady2(); break;
-	        case PLAYING: updatePlaying(directions.get(timestep), desiredDirs.get(timestep)); break;
+	        case PLAYING: updatePlaying(directions.get(timestep), desiredDirs.get(timestep), ghostsPositions.get(timestep)); break;
 	        case PACMAN_DIED: updatePacmanDied(); break;
-	        case GHOST_CATCHED: updateGhostCatched(); break;
+	        case GHOST_CATCHED: updateGhostCatched(directions.get(timestep), desiredDirs.get(timestep), ghostsPositions.get(timestep)); break;
 	        case LEVEL_CLEARED: updateLevelCleared(); break;
 	        case GAME_OVER: updateGameOver(); break;
         }
 	}
     
-    public void updatePlaying(int dir, int desiredDir) {
+    private void updateGhostCatched(int dir, int desiredDir, Vector2d position) {
+        if (mode == Mode.DIED) {
+            updateGhostDied(dir, desiredDir, position);
+            updateAnimation();
+        }	
+	}
+
+	public void updatePlaying(int dir, int desiredDir, Vector2d position) {
         switch (mode) {
-            case CAGE: updateGhostCage(); break;
-            case NORMAL: updateGhostNormal(dir, desiredDir); break;
-            case VULNERABLE: updateGhostVulnerable(dir, desiredDir); break;
-            case DIED: updateGhostDied(); break;
+            case CAGE: updateGhostCage(dir, desiredDir, position); break;
+            case NORMAL: updateGhostNormal(dir, desiredDir, position); break;
+            case VULNERABLE: updateGhostVulnerable(dir, desiredDir, position); break;
+            case DIED: updateGhostDied(dir, desiredDir, position); break;
         }
         updateAnimation();
     }
     
-    private void updateGhostMovement(int dir, int desiredDir, boolean useTarget, int targetCol, int targetRow
-            , int velocity, Runnable collisionWithPacmanAction, int ... desiredDirectionsMap) {
+    private void updateGhostMovement(int dir, int desiredDir, Vector2d position, boolean useTarget, int targetCol, int targetRow
+            , int velocity, Runnable collisionWithPacmanAction, int ... desiredDirectionsMap)
+    {
+    	
+//        if ((row == 14 && col == 1 && lastDirection == 2) 
+//                || (row == 14 && col == 34 && lastDirection == 0)) {
+//            adjustHorizontalOutsideMovement();
+//        }
         
-        desiredDirections.clear();
-        if (useTarget) {
-            if (targetCol - col > 0) {
-                desiredDirections.add(desiredDirectionsMap[0]);
-            }
-            else if (targetCol - col < 0) {
-                desiredDirections.add(desiredDirectionsMap[2]);
-            }
-            if (targetRow - row > 0) {
-                desiredDirections.add(desiredDirectionsMap[1]);
-            }
-            else if (targetRow - row < 0) {
-                desiredDirections.add(desiredDirectionsMap[3]);
-            }
-        }
-        if (desiredDirections.size() > 0) {
-            desiredDirection = desiredDir;
+//        if (Math.abs(this.x - position.x) > 1 || Math.abs(this.y - position.y) > 1)
+//        	System.out.println("WHAT THE FUCK");
+        
+        moveToTargetPosition1((int)position.x, (int)position.y, velocity);
+        
+        if (collisionWithPacmanAction != null && checkCollisionWithPacman()) {
+            collisionWithPacmanAction.run();
         }
         
-        yield:
-        while (true) {
-            switch (instructionPointer) {
-                case 0:
-                    if ((row == 14 && col == 1 && lastDirection == 2) 
-                            || (row == 14 && col == 34 && lastDirection == 0)) {
-                        adjustHorizontalOutsideMovement();
-                    }
-                    
-                    double angle = Math.toRadians(desiredDirection * 90);
-                    dx = (int) Math.cos(angle);
-                    dy = (int) Math.sin(angle);
-                    if (useTarget && game.maze[row + dy][col + dx] == 0
-                            && desiredDirection != backwardDirections[lastDirection]) {
-                        
-                        direction = desiredDirection;
-                    }
-                    else {
-                    	
-                        direction = dir;
-                        angle = Math.toRadians(direction * 90);
-                        dx = (int) Math.cos(angle);
-                        dy = (int) Math.sin(angle);
-                    }
-                    
-                    col += dx;
-                    row += dy;
-                    instructionPointer = 1;
-                case 1:
-                    if (!moveToGridPosition(col, row, velocity)) {
-                        lastDirection = direction;
-                        instructionPointer = 0;
-                        // adjustHorizontalOutsideMovement();
-                    }
-                    if (collisionWithPacmanAction != null && checkCollisionWithPacman()) {
-                        collisionWithPacmanAction.run();
-                    }
-                    break yield;
-            }
-        }        
+//        desiredDirections.clear();
+//        if (useTarget) {
+//            if (targetCol - col > 0) {
+//                desiredDirections.add(desiredDirectionsMap[0]);
+//            }
+//            else if (targetCol - col < 0) {
+//                desiredDirections.add(desiredDirectionsMap[2]);
+//            }
+//            if (targetRow - row > 0) {
+//                desiredDirections.add(desiredDirectionsMap[1]);
+//            }
+//            else if (targetRow - row < 0) {
+//                desiredDirections.add(desiredDirectionsMap[3]);
+//            }
+//        }
+//        if (desiredDirections.size() > 0) {
+//            desiredDirection = desiredDir;
+//        }
+//        
+//        yield:
+//        while (true) {
+//            switch (instructionPointer) {
+//                case 0:
+//                    if ((row == 14 && col == 1 && lastDirection == 2) 
+//                            || (row == 14 && col == 34 && lastDirection == 0)) {
+//                        adjustHorizontalOutsideMovement();
+//                    }
+//                    
+//                    double angle = Math.toRadians(desiredDirection * 90);
+//                    dx = (int) Math.cos(angle);
+//                    dy = (int) Math.sin(angle);
+//                    if (useTarget && game.maze[row + dy][col + dx] == 0
+//                            && desiredDirection != backwardDirections[lastDirection]) {
+//                        
+//                        direction = desiredDirection;
+//                    }
+//                    else {
+//                    	
+//                        direction = dir;
+//                        angle = Math.toRadians(direction * 90);
+//                        dx = (int) Math.cos(angle);
+//                        dy = (int) Math.sin(angle);
+//                    }
+//                    
+//                    col += position.x;
+//                    row += position.y;
+//                    instructionPointer = 1;
+//                case 1:
+//                    if (!moveToGridPosition(col, row, velocity)) {
+//                        lastDirection = direction;
+//                        instructionPointer = 0;
+//                        // adjustHorizontalOutsideMovement();
+//                    }
+//                    if (collisionWithPacmanAction != null && checkCollisionWithPacman()) {
+//                        collisionWithPacmanAction.run();
+//                    }
+//                    break yield;
+//            }
+//        }        
     }
     
-    private void updateGhostNormal(int dir, int desiredDir) {
+    private void updateGhostNormal(int dir, int desiredDir, Vector2d position) {
         if (checkVulnerableModeTime() && markAsVulnerable) {
             setMode(Mode.VULNERABLE);
             markAsVulnerable = false;
@@ -674,23 +717,171 @@ public class Ghost extends PacmanActor {
 //        }
         
         if (type == 0 || type == 1) {
-            updateGhostMovement(dir, desiredDir, true, pacman.col, pacman.row, 1, pacmanCatchedAction, 0, 1, 2, 3); // chase movement
+            updateGhostMovement(dir, desiredDir, position, true, pacman.col, pacman.row, 1, pacmanCatchedAction, 0, 1, 2, 3); // chase movement
         }
         else {
-            updateGhostMovement(dir, desiredDir, false, 0, 0, 1, pacmanCatchedAction, 0, 1, 2, 3); // random movement
+            updateGhostMovement(dir, desiredDir, position, false, 0, 0, 1, pacmanCatchedAction, 0, 1, 2, 3); // random movement
         }
 //        System.out.println("COL: " + col + " ROW: " + row + " VALORE: " + game.maze[row][col]);
     }
     
-    private void updateGhostVulnerable(int dir, int desiredDir) {
+    private void updateGhostVulnerable(int dir, int desiredDir, Vector2d position) {
         if (markAsVulnerable) {
             markAsVulnerable = false;
         }
         
-        updateGhostMovement(dir, desiredDir, true, pacman.col, pacman.row, 1, ghostCatchedAction, 2, 3, 0, 1); // run away movement
+        updateGhostMovement(dir, desiredDir, position, true, pacman.col, pacman.row, 1, ghostCatchedAction, 2, 3, 0, 1); // run away movement
         // return to normal mode after 8 seconds
         if (!checkVulnerableModeTime()) {
             setMode(Mode.NORMAL);
         }
     }        
+    
+    private void updateGhostDied(int dir, int desiredDir, Vector2d position) 
+    {
+        moveToTargetPosition1((int)position.x, (int)position.y, 4);
+        
+        if (this.x == 105 && this.y == 134)
+        	setMode(Mode.CAGE);
+        
+//        yield:
+//        while (true) {
+//            switch (instructionPointer) {
+//                case 0:
+//                    pathFinder.find(col, row, 18, 11);
+//                    instructionPointer = 1;
+//                case 1:
+//                    if (!pathFinder.hasNext()) {
+//                        instructionPointer = 3;
+//                        continue yield;
+//                    }
+//                    Point nextPosition = pathFinder.getNext();
+//                    col = nextPosition.x;
+//                    row = nextPosition.y;
+//                    instructionPointer = 2;
+//                case 2:
+//                    if (!moveToGridPosition(col, row, 4)) {
+//                        if (row == 11 && (col == 17 || col == 18)) {
+//                            instructionPointer = 3;
+//                            continue yield;
+//                        }
+//                        instructionPointer = 1;
+//                        continue yield;
+//                    }
+//                    break yield;
+//                case 3:
+//                    if (!moveToTargetPosition(105, 110, 4)){
+//                        instructionPointer = 4;
+//                        continue yield;
+//                    }
+//                    break yield;
+//                case 4:
+//                    if (!moveToTargetPosition(105, 134, 4)){
+//                        instructionPointer = 5;
+//                        continue yield;
+//                    }
+//                    break yield;
+//                case 5:
+//                    setMode(Mode.CAGE);
+//                    instructionPointer = 4;
+//                    break yield;
+//            }
+//        }
+    }
+    
+    private void updateGhostCage(int dir, int desiredDir, Vector2d position)
+    {
+    	moveToTargetPosition1((int)position.x, (int)position.y, 1);
+    	
+    	if (this.x == 109 && this.y == 110)
+    	{
+    		desiredDirection = 0;
+    		lastDirection = 0;
+    		updatePosition(18, 11);
+    		setMode(Mode.NORMAL);
+    	}
+    	
+    	if (this.x == 101 && this.y == 110)
+    	{
+            desiredDirection = 2;
+            lastDirection = 2;
+            updatePosition(17, 11);
+    		setMode(Mode.NORMAL);
+    	}
+    	
+//        yield:
+//        while (true) {
+//            switch (instructionPointer) {
+//                case 0:
+//                    Point initialPosition = initialPositions[type];
+//                    updatePosition(initialPosition.x, initialPosition.y);
+//                    x -= 4;
+//                    cageUpDownCount = 0;
+//                    if (type == 0) {
+//                        instructionPointer = 6;
+//                        break;
+//                    }
+//                    else if (type == 2) {
+//                        instructionPointer = 2;
+//                        break;
+//                    }
+//                    instructionPointer = 1;
+//                case 1:
+//                    if (moveToTargetPosition((int) x, 134 + 4, 1)) {
+//                        break yield;
+//                    }
+//                    instructionPointer = 2;
+//                case 2:
+//                    if (moveToTargetPosition((int) x, 134 - 4, 1)) {
+//                        break yield;
+//                    }
+//                    cageUpDownCount++;
+//                    if (cageUpDownCount <= type * 2) {
+//                        instructionPointer = 1;
+//                        break yield;
+//                    }
+//                    instructionPointer = 3;
+//                case 3:
+//                    if (moveToTargetPosition((int) x, 134, 1)) {
+//                        break yield;
+//                    }
+//                    instructionPointer = 4;
+//                case 4:
+//                    if (moveToTargetPosition((int) 105, 134, 1)) {
+//                        break yield;
+//                    }
+//                    instructionPointer = 5;
+//                case 5:
+//                    if (moveToTargetPosition((int) 105, 110, 1)) {
+//                        break yield;
+//                    }
+//                    if ((int) (2 * Math.random()) == 0) {
+//                        instructionPointer = 7;
+//                        continue yield;
+//                    }
+//                    instructionPointer = 6;
+//                case 6:
+//                    if (moveToTargetPosition((int) 109, 110, 1)) {
+//                        break yield;
+//                    }
+//                    desiredDirection = 0;
+//                    lastDirection = 0;
+//                    updatePosition(18, 11);
+//                    instructionPointer = 8;
+//                    continue yield;
+//                case 7:
+//                    if (moveToTargetPosition((int) 101, 110, 1)) {
+//                        break yield;
+//                    }
+//                    desiredDirection = 2;
+//                    lastDirection = 2;
+//                    updatePosition(17, 11);
+//                    instructionPointer = 8;
+//                case 8:
+//                    setMode(Mode.NORMAL);
+//                    break yield;
+//            }
+//        }
+    }
+    
 }

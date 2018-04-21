@@ -14,10 +14,10 @@ public class NewMainGui
 		
 		
 //		// GENERAZIONE GENOMA SU FILE
-//		String filename = "C:/Users/Alessio/Desktop/" + "pacman_12x0x1";
+//		String filename = MyConstants.DATA_DIR + "pacman_12x0x4";
 //		int ID = 1;
 //		int in_nodes = 13; //compreso un bias
-//		int out_nodes = 1;
+//		int out_nodes = 4;
 //		int hidden_nodes = 0;
 //		int max_nodes = in_nodes+out_nodes+hidden_nodes;
 //		boolean recur = false;
