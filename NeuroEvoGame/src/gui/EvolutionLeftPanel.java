@@ -20,6 +20,7 @@ import javax.swing.text.StyleConstants;
 import common.MyConstants;
 import jNeatCommon.EnvConstant;
 import jneat.Organism;
+import newGui.actor.Ghost;
 
 public class EvolutionLeftPanel extends JPanel
 {		
@@ -196,21 +197,21 @@ public class EvolutionLeftPanel extends JPanel
 //		infoLancio.update(infoLancio.getGraphics());
 		
 		
-		String info_lancio = 
-				"Target_x:  " + fmt6d.format(array.get(MyConstants.BEST_TARGET_X_INDEX)) + " m" + "\n" +
-				"Target_y:  " + fmt6d.format(array.get(MyConstants.BEST_TARGET_Y_INDEX)) + " m" + "\n" +
-				"Projectile_x:  " + fmt6d.format(array.get(MyConstants.X_MIGLIORE_INDEX)) + " m" + "\n" +
-				"Projectile_y:  " + fmt6d.format(array.get(MyConstants.Y_MIGLIORE_INDEX)) + " m" + "\n" +
-//				"y(Target_x):  " + fmt6d.format(array.get(MyConstants.Y_LANCIO_INDEX)) + " m" + "\n" +
-				"Angle:  " + fmt6d.format(Math.toDegrees(array.get(MyConstants.ANGOLO_INDEX))) + "°" + "\n" +
-				"Velocity:  " + fmt6d.format(array.get(MyConstants.VELOCITA_INDEX)) + " m/s" + "\n" +
-//				"forza:  " + array.get(MyConstants.FORZA_INDEX) + " N" + "\n" +
-				"Time:  " + fmt6d.format(array.get(MyConstants.TEMPO_INDEX)) + " s" + "\n" +	
-//				"accelerazione:  " + array.get(MyConstants.ACCELERAZIONE_INDEX) + "\n" +
-				"Mass:  " + fmt6d.format(array.get(MyConstants.MASSA_INDEX)) + " kg" + "\n" +
-				"Error:  " + fmt6d.format(array.get(MyConstants.ERRORE_INDEX)) + " m";
-		
-		throwPanel.getInfoLancio().setText(info_lancio);
+//		String info_lancio = 
+//				"Target_x:  " + fmt6d.format(array.get(MyConstants.BEST_TARGET_X_INDEX)) + " m" + "\n" +
+//				"Target_y:  " + fmt6d.format(array.get(MyConstants.BEST_TARGET_Y_INDEX)) + " m" + "\n" +
+//				"Projectile_x:  " + fmt6d.format(array.get(MyConstants.X_MIGLIORE_INDEX)) + " m" + "\n" +
+//				"Projectile_y:  " + fmt6d.format(array.get(MyConstants.Y_MIGLIORE_INDEX)) + " m" + "\n" +
+////				"y(Target_x):  " + fmt6d.format(array.get(MyConstants.Y_LANCIO_INDEX)) + " m" + "\n" +
+//				"Angle:  " + fmt6d.format(Math.toDegrees(array.get(MyConstants.ANGOLO_INDEX))) + "°" + "\n" +
+//				"Velocity:  " + fmt6d.format(array.get(MyConstants.VELOCITA_INDEX)) + " m/s" + "\n" +
+////				"forza:  " + array.get(MyConstants.FORZA_INDEX) + " N" + "\n" +
+//				"Time:  " + fmt6d.format(array.get(MyConstants.TEMPO_INDEX)) + " s" + "\n" +	
+////				"accelerazione:  " + array.get(MyConstants.ACCELERAZIONE_INDEX) + "\n" +
+//				"Mass:  " + fmt6d.format(array.get(MyConstants.MASSA_INDEX)) + " kg" + "\n" +
+//				"Error:  " + fmt6d.format(array.get(MyConstants.ERRORE_INDEX)) + " m";
+//		
+//		throwPanel.getInfoLancio().setText(info_lancio);
 		
 		
 //		infoLancio.setText(info_lancio);
@@ -229,29 +230,34 @@ public class EvolutionLeftPanel extends JPanel
 	
 	public void updateInfoRete(Organism o)
 	{
-		ArrayList<Double> array = o.getMap().get(EnvConstant.NUMBER_OF_SAMPLES);
 		String info_rete =
-				"errore totale:  " + array.get(MyConstants.ERRORE_TOTALE_INDEX) + " m" + "\n" +
-				"fitness totale:  " + array.get(MyConstants.FITNESS_TOTALE_INDEX);
+				"errore totale:  " + o.getError() + "\n" +
+				"fitness totale:  " + o.getOrig_fitness();
 //				"fitness vecchia:  " + array.get(MyConstants.FITNESS_VECCHIA_INDEX);
 			
 			netPanel.getInfoRete().setText(info_rete);
 	}
 	
-	public void updateInfoLancio(Organism o, int lancio)
+	public void updateInfoLancio(Organism o, int lancio, int timestep)
 	{
 		ArrayList<Double> array = o.getMap().get(lancio);
 		String info_lancio = 
-				"x_target:  " + array.get(MyConstants.X_TARGET_INDEX) + " m" + "\n" +
-				"y_target:  " + array.get(MyConstants.Y_TARGET_INDEX) + " m" + "\n" +
-				"y_lancio:  " + array.get(MyConstants.Y_LANCIO_INDEX) + " m" + "\n" +
-				"angolo:  " + Math.toDegrees(array.get(MyConstants.ANGOLO_INDEX)) + "°" + "\n" +
-				"velocità:  " + array.get(MyConstants.VELOCITA_INDEX) + " m/s" + "\n" +
-//				"forza:  " + array.get(MyConstants.FORZA_INDEX) + " N" + "\n" +
-				"tempo:  " + array.get(MyConstants.TEMPO_INDEX) + " s" + "\n" +	
-//				"accelerazione:  " + array.get(MyConstants.ACCELERAZIONE_INDEX) + "\n" +
-				"massa:  " + array.get(MyConstants.MASSA_INDEX) + " kg" + "\n" +
-				"errore:  " + array.get(MyConstants.ERRORE_INDEX) + " m";
+				"Pacman_x:  " + o.getPacmanPositions().get(timestep).x + "\n" +
+				"Pacman_y:  " + o.getPacmanPositions().get(timestep).y + "\n" +
+				"Pacman_direction:  " + o.getPacmanDirections().get(timestep) + "\n" +
+				"Ghost_1_x:  " + o.getGhostsPositions().get(0).get(timestep).x + "\n" +
+				"Ghost_1_y:  " + o.getGhostsPositions().get(0).get(timestep).y + "\n" +
+				"Ghost_1_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(0).get(timestep)) + "\n" +
+				"Ghost_2_x:  " + o.getGhostsPositions().get(1).get(timestep).x + "\n" +
+				"Ghost_2_y:  " + o.getGhostsPositions().get(1).get(timestep).y + "\n" +
+				"Ghost_2_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(1).get(timestep)) + "\n" +
+				"Ghost_3_x:  " + o.getGhostsPositions().get(2).get(timestep).x + "\n" +
+				"Ghost_3_y:  " + o.getGhostsPositions().get(2).get(timestep).y + "\n" +
+				"Ghost_3_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(2).get(timestep)) + "\n" +
+				"Ghost_4_x:  " + o.getGhostsPositions().get(3).get(timestep).x + "\n" +
+				"Ghost_4_y:  " + o.getGhostsPositions().get(3).get(timestep).y + "\n" +
+				"Ghost_4_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(3).get(timestep)) + "\n" +
+				"timestep:  " + timestep;
 		
 		throwPanel.getInfoLancio().setText(info_lancio);
 	}

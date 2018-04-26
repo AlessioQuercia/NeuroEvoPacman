@@ -59,6 +59,8 @@ import jneat.Organism;
 import jneat.Population;
 import jneat.Species;
 import log.HistoryLog;
+import newGui.actor.Ghost;
+import newGui.actor.Ghost.Mode;
 import pacmanGui.PacmanGame;
 import pacmanGui.PacmanGame.State;
 
@@ -263,10 +265,14 @@ private boolean done;
         ArrayList<HashMap<Integer, Integer>> ghostsDesiredDirections = null;
         
         boolean gameStarted = false;
+        int startStepsAsVulnerable = 0;
+
         
 		while (isRunning)
 		{	
 			long startTime = System.currentTimeMillis();
+			
+
 			
 			if (evolution.getStart() && winners.size() > 0 && evolution.getLeftPanel().getOptionsPanel().getGenerationList().getSelectedItem() != null)
 			{
@@ -304,12 +310,12 @@ private boolean done;
 					prevSelectedOrgIndex = selectedOrgIndex;
 					prevSelectedThrow = selectedThrow;
 					
-					evolution.getLeftPanel().updateInfoRete(selectedOrg.getMap().get(EnvConstant.NUMBER_OF_SAMPLES));
-					evolution.getLeftPanel().updateInfoLancio(infoLancio);
-					
 					timestep = 0;
 					evolution.getRightPanel().restartGame();
 					gameStarted = true;
+					
+					evolution.getLeftPanel().updateInfoRete(selectedOrg);
+					evolution.getLeftPanel().updateInfoLancio(selectedOrg, selectedThrow, timestep);
                 	
 					evolution.repaint();
 				}
@@ -323,7 +329,8 @@ private boolean done;
 					evolution.getRightPanel().restartGame();
 					gameStarted = true;
 				}
-					
+				
+		        double start = System.currentTimeMillis();
 				
 	            while (unprocessedTime >= desiredFrameRateTime) {
 	                unprocessedTime -= desiredFrameRateTime;
@@ -358,28 +365,44 @@ private boolean done;
 //	                System.out.println("TIMESTEP: " + timestep + "\n" + 
 //	                					"GHOST1_DIR: " + ghostsDirections.get(0).get(timestep));
 	                
-	                if (evolution.getRightPanel().getGame().state == State.PLAYING || evolution.getRightPanel().getGame().state == State.GHOST_CATCHED)
+	                if (evolution.getRightPanel().getGame().state == State.PLAYING)
 	                {
 //	                	System.out.println("REPRODUCE");
 //		                evolution.getRightPanel().getGame().update(pacmanDirections.get(timestep));
 	                	
-					   Vector2d position0 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(0).x, evolution.getRightPanel().getGame().getGhosts().get(0).y);
-					   Vector2d position1 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(1).x, evolution.getRightPanel().getGame().getGhosts().get(1).y);
-					   Vector2d position2 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(2).x, evolution.getRightPanel().getGame().getGhosts().get(2).y);
-					   Vector2d position3 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(3).x, evolution.getRightPanel().getGame().getGhosts().get(3).y);
+//					   Vector2d position0 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(0).x, evolution.getRightPanel().getGame().getGhosts().get(0).y);
+//					   Vector2d position1 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(1).x, evolution.getRightPanel().getGame().getGhosts().get(1).y);
+//					   Vector2d position2 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(2).x, evolution.getRightPanel().getGame().getGhosts().get(2).y);
+//					   Vector2d position3 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(3).x, evolution.getRightPanel().getGame().getGhosts().get(3).y);
 		                
 		                evolution.getRightPanel().reproduceSimulatedGame(timestep, pacmanDirections, ghostsDirections, ghostsDesiredDirections, ghostsPositions);	// REPRODUCE THE SIMULATED GAME
 		                
+		                if (evolution.getRightPanel().getGame().getGhosts().get(0).mode == Mode.VULNERABLE && startStepsAsVulnerable == 0)
+		                {
+		                	startStepsAsVulnerable = timestep;
+		                }
+		                
+		                if (evolution.getRightPanel().getGame().getGhosts().get(0).mode == Mode.VULNERABLE && timestep == startStepsAsVulnerable + 480)
+		                {
+		                	for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
+		                		g.mode = Mode.NORMAL;
+		                	
+		                	startStepsAsVulnerable = 0;
+		                }
+		                
+						evolution.getLeftPanel().updateInfoRete(selectedOrg);
+						evolution.getLeftPanel().updateInfoLancio(selectedOrg, selectedThrow, timestep);
+		                
 		                timestep++;
 		                
-		                if (Math.abs(evolution.getRightPanel().getGame().getGhosts().get(0).x - position0.x) > 1 || Math.abs(evolution.getRightPanel().getGame().getGhosts().get(0).y - position0.y) > 1)
-				        	System.out.println("WHAT THE FUCK_0 (" + evolution.getRightPanel().getGame().getGhosts().get(0).x + ", " + evolution.getRightPanel().getGame().getGhosts().get(0).y + ") (" + position0.x + ", " + position0.y + ") " + evolution.getRightPanel().getGame().getState());
-				        if (Math.abs(evolution.getRightPanel().getGame().getGhosts().get(1).x - position1.x) > 1 || Math.abs(evolution.getRightPanel().getGame().getGhosts().get(1).y - position1.y) > 1)
-				        	System.out.println("WHAT THE FUCK_1 (" + evolution.getRightPanel().getGame().getGhosts().get(1).x + ", " + evolution.getRightPanel().getGame().getGhosts().get(1).y + ") (" + position1.x + ", " + position1.y + ") " + evolution.getRightPanel().getGame().getState());
-				        if (Math.abs(evolution.getRightPanel().getGame().getGhosts().get(2).x - position2.x) > 1 || Math.abs(evolution.getRightPanel().getGame().getGhosts().get(2).y - position2.y) > 1)
-				        	System.out.println("WHAT THE FUCK_2 (" + evolution.getRightPanel().getGame().getGhosts().get(2).x + ", " + evolution.getRightPanel().getGame().getGhosts().get(2).y + ") (" + position2.x + ", " + position2.y + ") " + evolution.getRightPanel().getGame().getState());
-				        if (Math.abs(evolution.getRightPanel().getGame().getGhosts().get(3).x - position3.x) > 1 || Math.abs(evolution.getRightPanel().getGame().getGhosts().get(3).y - position3.y) > 1)
-				        	System.out.println("WHAT THE FUCK_3 (" + evolution.getRightPanel().getGame().getGhosts().get(3).x + ", " + evolution.getRightPanel().getGame().getGhosts().get(3).y + ") (" + position3.x + ", " + position3.y + ") " + evolution.getRightPanel().getGame().getState());
+//		                if (Math.abs(evolution.getRightPanel().getGame().getGhosts().get(0).x - position0.x) > 1 || Math.abs(evolution.getRightPanel().getGame().getGhosts().get(0).y - position0.y) > 1)
+//				        	System.out.println("WHAT THE FUCK_0 (" + evolution.getRightPanel().getGame().getGhosts().get(0).x + ", " + evolution.getRightPanel().getGame().getGhosts().get(0).y + ") (" + position0.x + ", " + position0.y + ") " + evolution.getRightPanel().getGame().getState());
+//				        if (Math.abs(evolution.getRightPanel().getGame().getGhosts().get(1).x - position1.x) > 1 || Math.abs(evolution.getRightPanel().getGame().getGhosts().get(1).y - position1.y) > 1)
+//				        	System.out.println("WHAT THE FUCK_1 (" + evolution.getRightPanel().getGame().getGhosts().get(1).x + ", " + evolution.getRightPanel().getGame().getGhosts().get(1).y + ") (" + position1.x + ", " + position1.y + ") " + evolution.getRightPanel().getGame().getState());
+//				        if (Math.abs(evolution.getRightPanel().getGame().getGhosts().get(2).x - position2.x) > 1 || Math.abs(evolution.getRightPanel().getGame().getGhosts().get(2).y - position2.y) > 1)
+//				        	System.out.println("WHAT THE FUCK_2 (" + evolution.getRightPanel().getGame().getGhosts().get(2).x + ", " + evolution.getRightPanel().getGame().getGhosts().get(2).y + ") (" + position2.x + ", " + position2.y + ") " + evolution.getRightPanel().getGame().getState());
+//				        if (Math.abs(evolution.getRightPanel().getGame().getGhosts().get(3).x - position3.x) > 1 || Math.abs(evolution.getRightPanel().getGame().getGhosts().get(3).y - position3.y) > 1)
+//				        	System.out.println("WHAT THE FUCK_3 (" + evolution.getRightPanel().getGame().getGhosts().get(3).x + ", " + evolution.getRightPanel().getGame().getGhosts().get(3).y + ") (" + position3.x + ", " + position3.y + ") " + evolution.getRightPanel().getGame().getState());
 	                }
 	                else
 	                {
@@ -429,7 +452,7 @@ private boolean done;
 				
 				fixedPool = Executors.newFixedThreadPool(1);	//// VERSIONE PARALLELA
 				EnvConstant.TYPE_OF_SIMULATION = EnvConstant.SIMULATION_FROM_CLASS;
-				fixedPool.submit(new OrganismRunnableMovementLoaded(organism, MyConstants.LOADED_X, MyConstants.LOADED_Y, selectedThrow));
+//				fixedPool.submit(new OrganismRunnableMovementLoaded(organism, MyConstants.LOADED_X, MyConstants.LOADED_Y, selectedThrow));
 				fixedPool.shutdown();							//// VERSIONE PARALLELA
 				
 				try {

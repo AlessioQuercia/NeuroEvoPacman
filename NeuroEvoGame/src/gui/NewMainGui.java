@@ -14,9 +14,9 @@ public class NewMainGui
 		
 		
 //		// GENERAZIONE GENOMA SU FILE
-//		String filename = MyConstants.DATA_DIR + "pacman_12x0x4";
+//		String filename = MyConstants.DATA_DIR + "pacman_17x0x4";
 //		int ID = 1;
-//		int in_nodes = 13; //compreso un bias
+//		int in_nodes = 17; //compreso un bias
 //		int out_nodes = 4;
 //		int hidden_nodes = 0;
 //		int max_nodes = in_nodes+out_nodes+hidden_nodes;

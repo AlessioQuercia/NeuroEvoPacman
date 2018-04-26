@@ -264,6 +264,7 @@ public class Pacman extends PacmanActor {
                     instructionPointer = 2;
                 case 2:
                     int frameIndex = 16 + (int) ((System.currentTimeMillis() - diedTime) * 0.0075);
+                    if (frameIndex >= frames.length) frameIndex = 29;
                     frame = frames[frameIndex];
                     if (frameIndex == 29) {
                         waitTime = System.currentTimeMillis();

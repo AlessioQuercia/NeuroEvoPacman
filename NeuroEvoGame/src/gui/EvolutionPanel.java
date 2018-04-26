@@ -611,37 +611,47 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 					}
 					else if (currentLine.equals("------ LANCIO: "+ lancio +" ------"))
 					{
-						String x_target [] = br.readLine().split(" ");
-						String y_target [] = br.readLine().split(" ");
-						String y_tiro [] = br.readLine().split(" ");
-						String angolo [] = br.readLine().split(" ");
-						String velocita [] = br.readLine().split(" ");
-						String forza [] = br.readLine().split(" ");
-						String tempo [] = br.readLine().split(" ");
-						String accelerazione [] = br.readLine().split(" ");
-						String massa [] = br.readLine().split(" ");
-						String errore [] = br.readLine().split(" ");
+						String pacman_x [] = br.readLine().split(" ");
+						String pacman_y [] = br.readLine().split(" ");
+						String pacman_direction [] = br.readLine().split(" ");
+						String ghost_1_x [] = br.readLine().split(" ");
+						String ghost_1_y [] = br.readLine().split(" ");
+						String ghost_1_direction [] = br.readLine().split(" ");
+						String ghost_2_x [] = br.readLine().split(" ");
+						String ghost_2_y [] = br.readLine().split(" ");
+						String ghost_2_direction [] = br.readLine().split(" ");
+						String ghost_3_x [] = br.readLine().split(" ");
+						String ghost_3_y [] = br.readLine().split(" ");
+						String ghost_3_direction [] = br.readLine().split(" ");
+						String ghost_4_x [] = br.readLine().split(" ");
+						String ghost_4_y [] = br.readLine().split(" ");
+						String ghost_4_direction [] = br.readLine().split(" ");
 						
-						double x_tgt = Double.parseDouble(x_target[x_target.length-1]);
-						double y_tgt = Double.parseDouble(y_target[y_target.length-1]);
-						double y_lancio = Double.parseDouble(y_tiro[y_tiro.length-1]);
-						double ang = Double.parseDouble(angolo[angolo.length-1]);
-						double v = Double.parseDouble(velocita[velocita.length-1]);
-						double f = Double.parseDouble(forza[forza.length-1]);
-						double t = Double.parseDouble(tempo[tempo.length-1]);
-						double acc = Double.parseDouble(accelerazione[accelerazione.length-1]);
-						double m = Double.parseDouble(massa[massa.length-1]);
-						double err = Double.parseDouble(errore[errore.length-1]);
-						array.set(MyConstants.X_TARGET_INDEX, x_tgt);
-						array.set(MyConstants.Y_TARGET_INDEX, y_tgt);
-						array.set(MyConstants.Y_LANCIO_INDEX, y_lancio);		
-						array.set(MyConstants.ANGOLO_INDEX, ang);
-						array.set(MyConstants.VELOCITA_INDEX, v);
-						array.set(MyConstants.FORZA_INDEX, f);		
-						array.set(MyConstants.TEMPO_INDEX, t);
-						array.set(MyConstants.ACCELERAZIONE_INDEX, acc);
-						array.set(MyConstants.MASSA_INDEX, m);	
-						array.set(MyConstants.ERRORE_INDEX, err);	
+						double pacman_X = Double.parseDouble(pacman_x[pacman_x.length-1]);
+						double pacman_Y = Double.parseDouble(pacman_y[pacman_y.length-1]);
+						double pacman_Direction = Double.parseDouble(pacman_direction[pacman_direction.length-1]);
+						double ghost_1_X = Double.parseDouble(ghost_1_x[ghost_1_x.length-1]);
+						double ghost_1_Y = Double.parseDouble(ghost_1_y[ghost_1_y.length-1]);
+						double ghost_1_Direction = Double.parseDouble(ghost_1_direction[ghost_1_direction.length-1]);
+						double ghost_2_X = Double.parseDouble(ghost_2_x[ghost_2_x.length-1]);
+						double ghost_2_Y = Double.parseDouble(ghost_2_y[ghost_2_y.length-1]);
+						double ghost_2_Direction = Double.parseDouble(ghost_2_direction[ghost_2_direction.length-1]);
+						double ghost_3_X = Double.parseDouble(ghost_3_x[ghost_3_x.length-1]);
+						double ghost_3_Y = Double.parseDouble(ghost_3_y[ghost_3_y.length-1]);
+						double ghost_3_Direction = Double.parseDouble(ghost_3_direction[ghost_3_direction.length-1]);
+						double ghost_4_X = Double.parseDouble(ghost_4_x[ghost_4_x.length-1]);
+						double ghost_4_Y = Double.parseDouble(ghost_4_y[ghost_4_y.length-1]);
+						double ghost_4_Direction = Double.parseDouble(ghost_4_direction[ghost_4_direction.length-1]);
+//						array.set(MyConstants.PACMAN_X_INDEX, x_tgt);
+//						array.set(MyConstants.Y_TARGET_INDEX, y_tgt);
+//						array.set(MyConstants.Y_LANCIO_INDEX, y_lancio);		
+//						array.set(MyConstants.ANGOLO_INDEX, ang);
+//						array.set(MyConstants.VELOCITA_INDEX, v);
+//						array.set(MyConstants.FORZA_INDEX, f);		
+//						array.set(MyConstants.TEMPO_INDEX, t);
+//						array.set(MyConstants.ACCELERAZIONE_INDEX, acc);
+//						array.set(MyConstants.MASSA_INDEX, m);	
+//						array.set(MyConstants.ERRORE_INDEX, err);	
 					}
 					
 		        }
@@ -716,16 +726,16 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 						double acc = Double.parseDouble(accelerazione[accelerazione.length-1]);
 						double m = Double.parseDouble(massa[massa.length-1]);
 						
-						array.set(MyConstants.X_TARGET_INDEX, x_tgt);
-						array.set(MyConstants.Y_TARGET_INDEX, y_tgt);
-						array.set(MyConstants.Y_LANCIO_INDEX, y_lancio);		
-						array.set(MyConstants.ANGOLO_INDEX, ang);
-						array.set(MyConstants.VELOCITA_INDEX, v);
-						array.set(MyConstants.FORZA_INDEX, f);		
-						array.set(MyConstants.TEMPO_INDEX, t);
-						array.set(MyConstants.ACCELERAZIONE_INDEX, acc);
-						array.set(MyConstants.MASSA_INDEX, m);	
-						array.set(MyConstants.ERRORE_INDEX, err);	
+//						array.set(MyConstants.X_TARGET_INDEX, x_tgt);
+//						array.set(MyConstants.Y_TARGET_INDEX, y_tgt);
+//						array.set(MyConstants.Y_LANCIO_INDEX, y_lancio);		
+//						array.set(MyConstants.ANGOLO_INDEX, ang);
+//						array.set(MyConstants.VELOCITA_INDEX, v);
+//						array.set(MyConstants.FORZA_INDEX, f);		
+//						array.set(MyConstants.TEMPO_INDEX, t);
+//						array.set(MyConstants.ACCELERAZIONE_INDEX, acc);
+//						array.set(MyConstants.MASSA_INDEX, m);	
+//						array.set(MyConstants.ERRORE_INDEX, err);	
 					}
 					
 		        }
@@ -747,17 +757,17 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 			for (int i=0; i<EnvConstant.NUMBER_OF_SAMPLES; i++)
 			{
 				ArrayList<Double> array = mappa.get(i);
-				infoLanci += "------ LANCIO: "+(i+1) +" ------" + "\n" + 
-						"X_OBJ: "+fmt6d.format(array.get(MyConstants.X_TARGET_INDEX)) + "\n" + 
-						"Y_OBJ: "+fmt6d.format(array.get(MyConstants.Y_TARGET_INDEX)) + "\n" + 
-						"Y_TIRO: "+fmt6d.format(array.get(MyConstants.Y_LANCIO_INDEX)) + "\n" + 
-						"ANGOLO: "+fmt6d.format(array.get(MyConstants.ANGOLO_INDEX)) + "\n" + 
-						"VELOCITA': "+fmt6d.format(array.get(MyConstants.VELOCITA_INDEX)) + "\n" + 
-						"ERRORE: "+fmt6d.format(array.get(MyConstants.ERRORE_INDEX)) + "\n" +
-						"FORZA: "+fmt6d.format(array.get(MyConstants.FORZA_INDEX)) + "\n" + 
-						"TEMPO: "+fmt6d.format(array.get(MyConstants.TEMPO_INDEX)) + "\n" + 
-						"ACCELERAZIONE: "+fmt6d.format(array.get(MyConstants.ACCELERAZIONE_INDEX)) + "\n" + 
-						"MASSA: "+fmt6d.format(array.get(MyConstants.MASSA_INDEX)) + "\n";
+//				infoLanci += "------ LANCIO: "+(i+1) +" ------" + "\n" + 
+//						"X_OBJ: "+fmt6d.format(array.get(MyConstants.X_TARGET_INDEX)) + "\n" + 
+//						"Y_OBJ: "+fmt6d.format(array.get(MyConstants.Y_TARGET_INDEX)) + "\n" + 
+//						"Y_TIRO: "+fmt6d.format(array.get(MyConstants.Y_LANCIO_INDEX)) + "\n" + 
+//						"ANGOLO: "+fmt6d.format(array.get(MyConstants.ANGOLO_INDEX)) + "\n" + 
+//						"VELOCITA': "+fmt6d.format(array.get(MyConstants.VELOCITA_INDEX)) + "\n" + 
+//						"ERRORE: "+fmt6d.format(array.get(MyConstants.ERRORE_INDEX)) + "\n" +
+//						"FORZA: "+fmt6d.format(array.get(MyConstants.FORZA_INDEX)) + "\n" + 
+//						"TEMPO: "+fmt6d.format(array.get(MyConstants.TEMPO_INDEX)) + "\n" + 
+//						"ACCELERAZIONE: "+fmt6d.format(array.get(MyConstants.ACCELERAZIONE_INDEX)) + "\n" + 
+//						"MASSA: "+fmt6d.format(array.get(MyConstants.MASSA_INDEX)) + "\n";
 	
 			}				
 			

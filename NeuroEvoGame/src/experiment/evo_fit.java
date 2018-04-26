@@ -35,8 +35,6 @@ public class evo_fit
 			  for (int i=0; i<MyConstants.INFO_LANCIO_SIZE; i++)
 				  array.add(0.0);
 			  
-			  direction = tgt[j][0];
-			  
 			  mappa.put(j, array);
 		  }
 		  

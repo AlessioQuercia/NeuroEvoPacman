@@ -14,6 +14,8 @@ import java.util.Map;
 
 import org.joml.Vector2d;
 
+import common.Direction;
+
 /**
  * Ghost class.
  * 
@@ -329,10 +331,10 @@ public class Ghost extends PacmanActor {
         }
         
         updateGhostMovement(true, pacman.col, pacman.row, 1, ghostCatchedAction, 2, 3, 0, 1); // run away movement
-        // return to normal mode after 8 seconds
-        if (!checkVulnerableModeTime()) {
-            setMode(Mode.NORMAL);
-        }
+//        // return to normal mode after 8 seconds
+//        if (!checkVulnerableModeTime()) {
+//            setMode(Mode.NORMAL);
+//        }
     }
     
     private boolean checkVulnerableModeTime() {
@@ -731,10 +733,10 @@ public class Ghost extends PacmanActor {
         }
         
         updateGhostMovement(dir, desiredDir, position, true, pacman.col, pacman.row, 1, ghostCatchedAction, 2, 3, 0, 1); // run away movement
-        // return to normal mode after 8 seconds
-        if (!checkVulnerableModeTime()) {
-            setMode(Mode.NORMAL);
-        }
+//        // return to normal mode after 8 seconds
+//        if (!checkVulnerableModeTime()) {
+//            setMode(Mode.NORMAL);
+//        }
     }        
     
     private void updateGhostDied(int dir, int desiredDir, Vector2d position) 
@@ -882,6 +884,21 @@ public class Ghost extends PacmanActor {
 //                    break yield;
 //            }
 //        }
+    }
+    
+    public static Direction getDirection(int direction)
+    {
+    	Direction result = null;
+    	
+        switch (direction) 
+        {
+	        case 0: result = Direction.RIGHT; break;
+	        case 1: result = Direction.DOWN; break;
+	        case 2: result = Direction.LEFT; break;
+	        case 3: result = Direction.UP; break;
+        }
+        
+        return result;
     }
     
 }

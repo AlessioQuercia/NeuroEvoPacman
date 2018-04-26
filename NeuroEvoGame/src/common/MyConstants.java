@@ -14,39 +14,37 @@ public class MyConstants
 	
 	/////COSTANTI PER IL CALCOLO DELLA FITNESS
 	public static int NUMBER_OF_SAMPLES = 10;
-	public static int FITNESS_CONSTANT = 200;
-	public static int MAX_FITNESS_PER_ORGANISM = (int) Math.pow(FITNESS_CONSTANT, 2);
-	public static int MAX_FITNESS = MAX_FITNESS_PER_ORGANISM*NUMBER_OF_SAMPLES;
+//	public static int FITNESS_CONSTANT = 200;
+//	public static int MAX_FITNESS_PER_ORGANISM = (int) Math.pow(FITNESS_CONSTANT, 2);
+	public static int MAX_FITNESS = 3333360;
 
 	/////INDICI DELLE INFORMAZIONI SUL LANCIO
-	public static int X_TARGET_INDEX = 0;
-	public static int Y_TARGET_INDEX = 1;
-	public static int Y_LANCIO_INDEX = 2;
-	public static int ANGOLO_INDEX = 3;
-	public static int VELOCITA_INDEX = 4;
-	public static int ERRORE_INDEX = 5;
-	public static int FITNESS_INDEX = 6;
-	public static int FORZA_INDEX = 7;
-	public static int TEMPO_INDEX = 8;
-	public static int ACCELERAZIONE_INDEX = 9;
-	public static int MASSA_INDEX = 10;
-	public static int X_MIGLIORE_INDEX = 11;
-	public static int Y_MIGLIORE_INDEX = 12;
-	public static int BEST_TARGET_X_INDEX = 13;
-	public static int BEST_TARGET_Y_INDEX = 14;
-	public static int VEL_RET_X_INDEX = 15;
-	public static int VEL_RET_Y_INDEX = 16;
+	public static int PACMAN_X_INDEX = 0;
+	public static int PACMAN_Y_INDEX = 1;
+	public static int PACMAN_DIRECTION = 2;
+	public static int GHOST_1_X_INDEX = 3;
+	public static int GHOST_1_Y_INDEX = 4;
+	public static int GHOST_1_DIRECTION = 5;
+	public static int GHOST_2_X_INDEX = 6;
+	public static int GHOST_2_Y_INDEX = 7;
+	public static int GHOST_2_DIRECTION = 8;
+	public static int GHOST_3_X_INDEX = 9;
+	public static int GHOST_3_Y_INDEX = 10;
+	public static int GHOST_3_DIRECTION = 11;
+	public static int GHOST_4_X_INDEX = 12;
+	public static int GHOST_4_Y_INDEX = 13;
+	public static int GHOST_4_DIRECTION = 14;
 	
 	/////INDICI DELLE INFORMAZIONI SULLA RETE
-	public static int ERRORE_TOTALE_INDEX = 17;
-	public static int FITNESS_TOTALE_INDEX = 18;
-	public static int FITNESS_VECCHIA_INDEX = 19;
-	public static int LANCIO_MIGLIORE_INDEX = 20;
-	public static int WIN_INDEX = 21;
+	public static int ERRORE_TOTALE_INDEX = 15;
+	public static int FITNESS_TOTALE_INDEX = 16;
+	public static int FITNESS_VECCHIA_INDEX = 17;
+	public static int LANCIO_MIGLIORE_INDEX = 18;
+	public static int WIN_INDEX = 19;
 	
 	/////NUMERO INDICI
-	public static int INFO_LANCIO_SIZE = 17;
-	public static int INFO_RETE_SIZE = 22;
+	public static int INFO_LANCIO_SIZE = 15;
+	public static int INFO_RETE_SIZE = 20;
 	
 	
 	/////INFORMAZIONI PER START

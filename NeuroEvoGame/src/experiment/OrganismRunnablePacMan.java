@@ -16,6 +16,8 @@ import jNeatCommon.EnvConstant;
 import jneat.NNode;
 import jneat.Network;
 import jneat.Organism;
+import newGui.actor.Ghost;
+import newGui.actor.Ghost.Mode;
 import newGui.infra.Game;
 import pacmanGui.PacmanGame;
 import pacmanGui.PacmanGame.State;
@@ -173,6 +175,12 @@ public class OrganismRunnablePacMan implements Runnable
 					 int maxCols = 30;
 					 int minRows = 0;
 					 int minCols = 0;
+					 int minVal = 0;
+					 int maxVal = 3;
+					 int pacmanLeft = game.maze[game.getPacMan().row][game.getPacMan().col - 1];
+					 int pacmanRight = game.maze[game.getPacMan().row][game.getPacMan().col + 1];
+					 int pacmanUp = game.maze[game.getPacMan().row - 1][game.getPacMan().col];
+					 int pacmanDown = game.maze[game.getPacMan().row + 1][game.getPacMan().col + 1];
 					 
 				   for (count = 0; count < EnvConstant.NUMBER_OF_SAMPLES; count++) 
 				   {   
@@ -208,6 +216,8 @@ public class OrganismRunnablePacMan implements Runnable
 					   int total_time = 0;
 					   int perLive_time = 0;
 					   
+					   int stepsAsVulnerable = 0;
+					   
 					   game.startGame();
 					   
 					   while (game.getLives() > 0)
@@ -232,6 +242,16 @@ public class OrganismRunnablePacMan implements Runnable
 						   
 //						   in[5] = (game.getPacMan().getRow() - minRows)/maxRows; // CONVERSIONE DA VALORE TRA MIN E MAX A VALORE TRA 0 E 1
 						   
+						   pacmanLeft = game.maze[game.getPacMan().row][game.getPacMan().col - 1];
+						   pacmanRight = game.maze[game.getPacMan().row][game.getPacMan().col + 1];
+						   pacmanUp = game.maze[game.getPacMan().row - 1][game.getPacMan().col];
+						   pacmanDown = game.maze[game.getPacMan().row + 1][game.getPacMan().col + 1];
+						   
+						   if (pacmanLeft == -1) pacmanLeft = 0;
+						   if (pacmanRight == -1) pacmanRight = 0;
+						   if (pacmanUp == -1) pacmanUp = 0;
+						   if (pacmanDown == -1) pacmanDown = 0;
+						   
 						   
 						   in[0] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL
 						   in[1] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW
@@ -245,6 +265,10 @@ public class OrganismRunnablePacMan implements Runnable
 						   in[9] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_Y = GHOST3_ROW
 						   in[10] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_X = GHOST4_COL
 						   in[11] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_Y = GHOST4_ROW
+						   in[12] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+						   in[13] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+						   in[14] = (pacmanUp - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+						   in[15] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
 						   
 						   tgt[count][0] = in[0];
 						   tgt[count][1] = in[1];
@@ -258,6 +282,10 @@ public class OrganismRunnablePacMan implements Runnable
 						   tgt[count][9] = in[9];
 						   tgt[count][10] = in[10];
 						   tgt[count][11] = in[11];
+						   tgt[count][12] = in[12];
+						   tgt[count][13] = in[13];
+						   tgt[count][14] = in[14];
+						   tgt[count][15] = in[15];
 						   
 						   pacmanPositions.put(total_time, new Vector2d(game.getPacMan().row, game.getPacMan().col));
 						   ghost1.put(total_time, new Vector2d(game.getGhosts().get(0).row, game.getGhosts().get(0).col));
@@ -270,7 +298,7 @@ public class OrganismRunnablePacMan implements Runnable
 						   int previousCol[] = new int[4];
 						   int previousRow[] = new int[4];
 
-						   while (game.getState() != State.PACMAN_DIED || game.getState() == State.GHOST_CATCHED)
+						   while (game.getState() != State.PACMAN_DIED)
 						   {
 							   previousCol[0] = game.getGhosts().get(0).col;
 							   previousRow[0] = game.getGhosts().get(0).row;
@@ -333,6 +361,17 @@ public class OrganismRunnablePacMan implements Runnable
 							   
 							   game.update(direction);
 							   
+							   if (game.getGhosts().get(0).mode == Mode.VULNERABLE)
+								   stepsAsVulnerable++;
+							   
+							   if (game.getGhosts().get(0).mode == Mode.VULNERABLE && stepsAsVulnerable == 480)
+							   {
+								   for (Ghost g : game.getGhosts())
+									   g.mode = Mode.NORMAL;
+								   
+								   stepsAsVulnerable = 0;
+							   }
+							   
 //							   System.out.println(game.getGhosts().get(0).getTargetCol(-27) + " " + game.getGhosts().get(0).getTargetCol(134));
 //							   System.out.println(game.getGhosts().get(0).getTargetCol(236) + " " + game.getGhosts().get(0).getTargetCol(134));
 //							   System.out.println(game.getGhosts().get(0).getTargetCol(237) + " " + game.getGhosts().get(0).getTargetCol(134));
@@ -358,6 +397,16 @@ public class OrganismRunnablePacMan implements Runnable
 //								   game.getGhosts().get(i).updatePlaying();
 //							   }
 							   
+							   pacmanLeft = game.maze[game.getPacMan().row][game.getPacMan().col - 1];
+							   pacmanRight = game.maze[game.getPacMan().row][game.getPacMan().col + 1];
+							   pacmanUp = game.maze[game.getPacMan().row - 1][game.getPacMan().col];
+							   pacmanDown = game.maze[game.getPacMan().row + 1][game.getPacMan().col + 1];
+							   
+							   if (pacmanLeft == -1) pacmanLeft = 0;
+							   if (pacmanRight == -1) pacmanRight = 0;
+							   if (pacmanUp == -1) pacmanUp = 0;
+							   if (pacmanDown == -1) pacmanDown = 0;
+							   
 							   // AGGIORNAMENTO DELLE POSIZIONI
 							   in[0] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL
 							   in[1] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW
@@ -371,6 +420,10 @@ public class OrganismRunnablePacMan implements Runnable
 							   in[9] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_Y = GHOST3_ROW
 							   in[10] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_X = GHOST4_COL
 							   in[11] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_Y = GHOST4_ROW
+							   in[12] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+							   in[13] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+							   in[14] = (pacmanUp - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+							   in[15] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
 							   
 							   tgt[count][0] = in[0];
 							   tgt[count][1] = in[1];
@@ -384,6 +437,10 @@ public class OrganismRunnablePacMan implements Runnable
 							   tgt[count][9] = in[9];
 							   tgt[count][10] = in[10];
 							   tgt[count][11] = in[11];
+							   tgt[count][12] = in[12];
+							   tgt[count][13] = in[13];
+							   tgt[count][14] = in[14];
+							   tgt[count][15] = in[15];
 							   
 							   // SALVATAGGIO POSIZIONI RISPETTO AL TEMPO TOTALE
 							   pacmanPositions.put(total_time, new Vector2d(game.getPacMan().x, game.getPacMan().y));
@@ -428,6 +485,11 @@ public class OrganismRunnablePacMan implements Runnable
 							   
 							   // AGGIORNAMENTO DEL TEMPO TOTALE (TEMPO INTESO COME PASSI)
 							   total_time++;
+							   
+							   // CHECK PER CATCHED GHSOT
+							   while (game.getState() == State.GHOST_CATCHED)
+								   game.update();
+								   
 						   }
 						   
 						   
@@ -437,6 +499,8 @@ public class OrganismRunnablePacMan implements Runnable
 						   
 						   tgt[count][12] = Double.parseDouble(game.getScore());
 					   }
+					   
+					   game.timestep = total_time;
 				   }
 				   
 				} 
@@ -488,8 +552,8 @@ public class OrganismRunnablePacMan implements Runnable
 //				   x_target = Array.getDouble(ObjRet_fit, 6);
 				   HashMap<Integer,ArrayList<Double>> mappa = (HashMap<Integer, ArrayList<Double>>) ObjRet_fit;
 				   ArrayList<Double> arrayBest = mappa.get(EnvConstant.NUMBER_OF_SAMPLES);
-				   fit_dyn = Integer.parseInt(game.getScore());//arrayBest.get(MyConstants.FITNESS_TOTALE_INDEX);
 				   
+				   fit_dyn = Integer.parseInt(game.getScore());//arrayBest.get(MyConstants.FITNESS_TOTALE_INDEX);
 //				   System.out.println(fit_dyn);
 				   
 				   err_dyn = Math.pow((3333360 - Integer.parseInt(game.getScore())), 2);//arrayBest.get(MyConstants.ERRORE_INDEX);
@@ -525,6 +589,8 @@ public class OrganismRunnablePacMan implements Runnable
 				organism.setPacmanDirections(pacmanDirections);
 				organism.setGhostsDirections(ghostsDirections);
 				organism.setGhostsDesiredDirections(ghostsDesiredDirections);
+				
+//				System.out.println(organism.getFitness());
 			 } 
 			 
 			 
