@@ -230,10 +230,20 @@ public class EvolutionLeftPanel extends JPanel
 	
 	public void updateInfoRete(Organism o)
 	{
-		String info_rete =
-				"errore totale:  " + o.getError() + "\n" +
-				"fitness totale:  " + o.getOrig_fitness();
+		String info_rete;
+		try {
+		 info_rete =
+				"errore totale:  " + (int)o.getError() + "\n" + //fmt6d.format(o.getError() + "\n") +
+				"fitness totale:  " + fmt6d.format(o.getOrig_fitness()) + "\n" +
+				"score: " + o.getHighScore();
 //				"fitness vecchia:  " + array.get(MyConstants.FITNESS_VECCHIA_INDEX);
+		}
+		catch(Exception e)
+		{
+			info_rete =
+					"errore totale:  " + "UNKNOWN" + "\n" +
+					"fitness totale:  " + fmt6d.format(o.getOrig_fitness());
+		}
 			
 			netPanel.getInfoRete().setText(info_rete);
 	}
@@ -241,25 +251,52 @@ public class EvolutionLeftPanel extends JPanel
 	public void updateInfoLancio(Organism o, int lancio, int timestep)
 	{
 		ArrayList<Double> array = o.getMap().get(lancio);
-		String info_lancio = 
-				"Pacman_x:  " + o.getPacmanPositions().get(timestep).x + "\n" +
-				"Pacman_y:  " + o.getPacmanPositions().get(timestep).y + "\n" +
-				"Pacman_direction:  " + o.getPacmanDirections().get(timestep) + "\n" +
-				"Ghost_1_x:  " + o.getGhostsPositions().get(0).get(timestep).x + "\n" +
-				"Ghost_1_y:  " + o.getGhostsPositions().get(0).get(timestep).y + "\n" +
-				"Ghost_1_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(0).get(timestep)) + "\n" +
-				"Ghost_2_x:  " + o.getGhostsPositions().get(1).get(timestep).x + "\n" +
-				"Ghost_2_y:  " + o.getGhostsPositions().get(1).get(timestep).y + "\n" +
-				"Ghost_2_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(1).get(timestep)) + "\n" +
-				"Ghost_3_x:  " + o.getGhostsPositions().get(2).get(timestep).x + "\n" +
-				"Ghost_3_y:  " + o.getGhostsPositions().get(2).get(timestep).y + "\n" +
-				"Ghost_3_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(2).get(timestep)) + "\n" +
-				"Ghost_4_x:  " + o.getGhostsPositions().get(3).get(timestep).x + "\n" +
-				"Ghost_4_y:  " + o.getGhostsPositions().get(3).get(timestep).y + "\n" +
-				"Ghost_4_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(3).get(timestep)) + "\n" +
-				"timestep:  " + timestep;
+		try {
+			
+			String info_lancio = 
+	//				"Pacman_x:  " + o.getPacmanPositions().get(timestep).x + "\n" +
+	//				"Pacman_y:  " + o.getPacmanPositions().get(timestep).y + "\n" +
+	//				"Pacman_direction:  " + o.getPacmanDirections().get(timestep) + "\n" +
+	//				"Ghost_1_x:  " + o.getGhostsPositions().get(0).get(timestep).x + "\n" +
+	//				"Ghost_1_y:  " + o.getGhostsPositions().get(0).get(timestep).y + "\n" +
+	//				"Ghost_1_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(0).get(timestep)) + "\n" +
+	//				"Ghost_2_x:  " + o.getGhostsPositions().get(1).get(timestep).x + "\n" +
+	//				"Ghost_2_y:  " + o.getGhostsPositions().get(1).get(timestep).y + "\n" +
+	//				"Ghost_2_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(1).get(timestep)) + "\n" +
+	//				"Ghost_3_x:  " + o.getGhostsPositions().get(2).get(timestep).x + "\n" +
+	//				"Ghost_3_y:  " + o.getGhostsPositions().get(2).get(timestep).y + "\n" +
+	//				"Ghost_3_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(2).get(timestep)) + "\n" +
+	//				"Ghost_4_x:  " + o.getGhostsPositions().get(3).get(timestep).x + "\n" +
+	//				"Ghost_4_y:  " + o.getGhostsPositions().get(3).get(timestep).y + "\n" +
+	//				"Ghost_4_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(3).get(timestep)) + "\n" +
+					"Pacman_left: " + o.getPacmanLefts().get(timestep) + "\n" +
+					"Pacman_right: " + o.getPacmanRights().get(timestep) + "\n" +
+					"Pacman_up: " + o.getPacmanUps().get(timestep) + "\n" +
+					"Pacman_down: " + o.getPacmanDowns().get(timestep) + "\n" +
+//					"Pacman_left2: " + o.getPacmanLefts2().get(timestep) + "\n" +
+//					"Pacman_right2: " + o.getPacmanRights2().get(timestep) + "\n" +
+//					"Pacman_up2: " + o.getPacmanUps2().get(timestep) + "\n" +
+//					"Pacman_down2: " + o.getPacmanDowns2().get(timestep) + "\n" +
+					"Nearest_Coin_Row: " + o.getPacmanNearestFoods().get(timestep).row + "\n" + 
+					"Nearest_Coin_Col: " + o.getPacmanNearestFoods().get(timestep).col + "\n" + 
+					"timestep:  " + timestep + "\n" +
+					"Pacman_left_output: " + fmt6d.format(o.getPacmanLeftOutputs().get(timestep)) + "\n" + 
+					"Pacman_right_output: " + fmt6d.format(o.getPacmanRightOutputs().get(timestep))  + "\n" + 
+					"Pacman_up_output: " + fmt6d.format(o.getPacmanUpOutputs().get(timestep))  + "\n" + 
+					"Pacman_down_output: " + fmt6d.format(o.getPacmanDownOutputs().get(timestep)) + "\n" + 
+					"Pacman_noAction_output " + fmt6d.format(o.getPacmanNoActionsOutputs().get(timestep)) + "\n" + 
+					"Pacman_Action: " + o.getPacmanDesiredDirections().get(timestep);
+					;
+			
+			throwPanel.getInfoLancio().setText(info_lancio);
+		}
+		catch (Exception e) 
+		{
+//			System.out.println("ERRORE NELL'UPDATEINFOLANCIO");
+//			System.out.println(e.getMessage());
+		}
+			
 		
-		throwPanel.getInfoLancio().setText(info_lancio);
 	}
 	
 	public void init()

@@ -32,6 +32,9 @@ public class Game{
     public BitmapFontRenderer bitmapFontRenderer = new BitmapFontRenderer("/res/font8x8.png", 16, 16);
     
     public int timestep;
+    
+    public int collectable_total_number;
+    public int collectable_current_number;
 
     public void init() {
     }
@@ -95,7 +98,8 @@ public class Game{
 		this.screenScale = screenScale;
 	}
 
-	public void reproduceSimulatedGame(int timestep, Map<Integer, Direction> pacmanDirections, ArrayList<HashMap<Integer, Integer>> ghostsDirections, 
+	public void reproduceSimulatedGame(int timestep, Map<Integer, Integer> pacmanDirections, Map<Integer, Direction> pacmanDesiredDirections, Map<Integer, Vector2d> pacmanPositions, 
+			Map<Integer, Vector2d> pacmanCoordinates, ArrayList<HashMap<Integer, Integer>> ghostsDirections, 
 			ArrayList<HashMap<Integer, Integer>> ghostsDesiredDirections, ArrayList<HashMap<Integer, Vector2d>> ghostsPositions)
 	{
         for (Actor actor : actors) 
@@ -103,7 +107,7 @@ public class Game{
         	if (actor instanceof Pacman)
         	{
         		Pacman p = (Pacman) actor;
-        		p.reproduceSimulatedMove(timestep, pacmanDirections);
+        		p.reproduceSimulatedMove(timestep, pacmanDirections, pacmanDesiredDirections, pacmanPositions, pacmanCoordinates);
         	}
         	else if (actor instanceof Ghost)
         	{
@@ -115,14 +119,44 @@ public class Game{
         }
 	}
 	
-	public void update(Direction direction)
+	public void reproduceSimulatedGameGhostCatched(Vector2d position, int timestep, Map<Integer, Vector2d> pacmanPositions, ArrayList<HashMap<Integer, Integer>> ghostsDirections, 
+			ArrayList<HashMap<Integer, Integer>> ghostsDesiredDirections, ArrayList<HashMap<Integer, Vector2d>> ghostsPositions)
 	{
         for (Actor actor : actors) 
         {
         	if (actor instanceof Pacman)
         	{
         		Pacman p = (Pacman) actor;
+        		p.reproduceSimulatedMoveGhostCatched(position, timestep, pacmanPositions);
+        	}
+        	else if (actor instanceof Ghost)
+        	{
+        		Ghost g = (Ghost) actor;
+        		g.reproduceSimulatedMove(timestep, ghostsDirections.get(g.type), ghostsDesiredDirections.get(g.type), ghostsPositions.get(g.type));
+        	}
+        	else
+        		actor.update();
+        }
+	}
+	
+	public void update(Direction direction, String GhostCatched)
+	{
+        for (Actor actor : actors) 
+        {
+        	if (actor instanceof Pacman && GhostCatched.equals("NORMAL"))
+        	{
+        		Pacman p = (Pacman) actor;
+        		p.visible = true;
         		p.updatePlaying(direction);
+        	}
+        	else if (actor instanceof Pacman && GhostCatched.equals("GHOST_CATCHED"))
+        	{
+        		Pacman p = (Pacman) actor;
+        		p.visible = false;
+        		p.updatePlaying(direction);
+//        		p.updatePosition();
+//        		p.updateCollider();
+//        		p.updateAnimation();
         	}
         	else
         	{

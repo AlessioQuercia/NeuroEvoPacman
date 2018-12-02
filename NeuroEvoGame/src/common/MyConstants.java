@@ -19,21 +19,25 @@ public class MyConstants
 	public static int MAX_FITNESS = 3333360;
 
 	/////INDICI DELLE INFORMAZIONI SUL LANCIO
-	public static int PACMAN_X_INDEX = 0;
-	public static int PACMAN_Y_INDEX = 1;
-	public static int PACMAN_DIRECTION = 2;
-	public static int GHOST_1_X_INDEX = 3;
-	public static int GHOST_1_Y_INDEX = 4;
-	public static int GHOST_1_DIRECTION = 5;
-	public static int GHOST_2_X_INDEX = 6;
-	public static int GHOST_2_Y_INDEX = 7;
-	public static int GHOST_2_DIRECTION = 8;
-	public static int GHOST_3_X_INDEX = 9;
-	public static int GHOST_3_Y_INDEX = 10;
-	public static int GHOST_3_DIRECTION = 11;
-	public static int GHOST_4_X_INDEX = 12;
-	public static int GHOST_4_Y_INDEX = 13;
-	public static int GHOST_4_DIRECTION = 14;
+	public static int PACMAN_LEFT = 0;
+	public static int PACMAN_RIGHT = 1;
+	public static int PACMAN_UP = 2;
+	public static int PACMAN_DOWN = 3;
+//	public static int PACMAN_X_INDEX = 0;
+//	public static int PACMAN_Y_INDEX = 1;
+//	public static int PACMAN_DIRECTION = 2;
+//	public static int GHOST_1_X_INDEX = 3;
+//	public static int GHOST_1_Y_INDEX = 4;
+//	public static int GHOST_1_DIRECTION = 5;
+//	public static int GHOST_2_X_INDEX = 6;
+//	public static int GHOST_2_Y_INDEX = 7;
+//	public static int GHOST_2_DIRECTION = 8;
+//	public static int GHOST_3_X_INDEX = 9;
+//	public static int GHOST_3_Y_INDEX = 10;
+//	public static int GHOST_3_DIRECTION = 11;
+//	public static int GHOST_4_X_INDEX = 12;
+//	public static int GHOST_4_Y_INDEX = 13;
+//	public static int GHOST_4_DIRECTION = 14;
 	
 	/////INDICI DELLE INFORMAZIONI SULLA RETE
 	public static int ERRORE_TOTALE_INDEX = 15;
@@ -50,10 +54,10 @@ public class MyConstants
 	/////INFORMAZIONI PER START
 //	public static String COMPUTER_DIR = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\NeuroEvoGame\\src\\gui\\";
 	public static String DATA_DIR = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\NeuroEvoGame\\src\\gui\\data\\";
-	public static String RESULTS_DIR = "C:/Users/Alessio/Desktop/results/";
-	public static String POPULATIONS_DIR = "C:/Users/Alessio/Desktop/populations/";
+	public static String RESULTS_DIR = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\results\\";
+	public static String POPULATIONS_DIR = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\populations\\";
 	public static String PARAMETRI_NOMEFILE = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\NeuroEvoGame\\src\\gui\\data\\parameters";
-	public static String GENOMA_NOMEFILE = DATA_DIR + "pacman_12x0x4";
+	public static String GENOMA_NOMEFILE = DATA_DIR + "pacman_23x4x5";
 	public static String POP_NOMEFILE = DATA_DIR + "primitive";
 	public static String POPULATION_FILENAME = "C:\\Users\\Alessio\\Documents\\GitHub\\NeuroEvoGame\\NeuroEvoGame\\src\\gui\\data\\population_0";
 	

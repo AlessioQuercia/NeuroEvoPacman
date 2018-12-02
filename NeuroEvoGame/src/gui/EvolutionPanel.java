@@ -39,7 +39,7 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 {
 	private JFrame frame;
 	
-	private MainPanel mainPanel;
+	private MainPanel2 mainPanel;
 	private EvolutionLeftPanel leftPanel;
 	private DisplayPanel throwPanel;
     
@@ -58,7 +58,7 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 	
 	private GridBagConstraints gc;
 
-	public EvolutionPanel(JFrame frame, MainPanel mainPanel) 
+	public EvolutionPanel(JFrame frame, MainPanel2 mainPanel) 
 	{
 		this.frame = frame;
 		this.mainPanel = mainPanel;

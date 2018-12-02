@@ -13,9 +13,9 @@ import pacmanGui.PacmanGame.State;
  */
 public class PowerBall extends PacmanActor {
     
-    private int col;
-    private int row;
-    private boolean eated;
+    public int col;
+    public int row;
+    public boolean eated;
     
     public PowerBall(PacmanGame game, int col, int row) {
         super(game);
@@ -43,6 +43,8 @@ public class PowerBall extends PacmanActor {
             visible = false;
             game.addScore(50);
             game.startGhostVulnerableMode();
+            game.getPacMan().canEatGhosts = true;
+            game.powerUpList.remove(this);
         }
     }
     

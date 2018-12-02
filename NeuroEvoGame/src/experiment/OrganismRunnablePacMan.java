@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 
@@ -16,8 +17,10 @@ import jNeatCommon.EnvConstant;
 import jneat.NNode;
 import jneat.Network;
 import jneat.Organism;
+import newGui.actor.Food;
 import newGui.actor.Ghost;
 import newGui.actor.Ghost.Mode;
+import newGui.actor.PowerBall;
 import newGui.infra.Game;
 import pacmanGui.PacmanGame;
 import pacmanGui.PacmanGame.State;
@@ -32,6 +35,24 @@ public class OrganismRunnablePacMan implements Runnable
 	private Map<Integer, Direction> pacmanDirections;
 	private ArrayList<HashMap<Integer, Integer>> ghostsDirections;
 	private ArrayList<HashMap<Integer, Integer>> ghostsDesiredDirections;
+	private Map<Integer, Integer> pacmanLefts;
+	private Map<Integer, Integer> pacmanRights;
+	private Map<Integer, Integer> pacmanUps;
+	private Map<Integer, Integer> pacmanDowns;
+	private Map<Integer, Integer> pacmanLefts2;
+	private Map<Integer, Integer> pacmanRights2;
+	private Map<Integer, Integer> pacmanUps2;
+	private Map<Integer, Integer> pacmanDowns2;
+	private Map<Integer, Food> pacmanNearestFoods;
+	private Map<Integer, Double> pacmanLeftOutputs;
+	private Map<Integer, Double> pacmanRightOutputs;
+	private Map<Integer, Double> pacmanUpOutputs;
+	private Map<Integer, Double> pacmanDownOutputs;
+	private Map<Integer, Double> pacmanNoActionsOutputs;
+	
+	private Direction previousDirection;
+	
+	private LinkedList<Direction> lastDirections;
 	
 	// dynamic definition for fitness
 		  Class  Class_fit;
@@ -51,6 +72,27 @@ public class OrganismRunnablePacMan implements Runnable
 		this.ghostsDirections = new ArrayList<HashMap<Integer, Integer>> ();
 		this.ghostsDesiredDirections = new ArrayList<HashMap<Integer, Integer>> ();
 		
+		this.pacmanLefts = new HashMap<>();
+		this.pacmanRights = new HashMap<>();
+		this.pacmanUps = new HashMap<>();
+		this.pacmanDowns = new HashMap<>();
+		
+		this.pacmanLefts2 = new HashMap<>();
+		this.pacmanRights2 = new HashMap<>();
+		this.pacmanUps2 = new HashMap<>();
+		this.pacmanDowns2 = new HashMap<>();
+		
+		this.pacmanNearestFoods = new HashMap<>();
+		
+		this.pacmanLeftOutputs = new HashMap<>();
+		this.pacmanRightOutputs = new HashMap<>();
+		this.pacmanUpOutputs = new HashMap<>();
+		this.pacmanDownOutputs = new HashMap<>();
+		this.pacmanNoActionsOutputs = new HashMap<>();
+		
+		this.previousDirection = Direction.RIGHT;
+		
+		this.lastDirections = new LinkedList<Direction>();
 		
 		Class_fit = evo_fit.class; //Class.forName(EnvConstant.CLASS_FITNESS);
 		try {
@@ -176,11 +218,22 @@ public class OrganismRunnablePacMan implements Runnable
 					 int minRows = 0;
 					 int minCols = 0;
 					 int minVal = 0;
-					 int maxVal = 3;
-					 int pacmanLeft = game.maze[game.getPacMan().row][game.getPacMan().col - 1];
-					 int pacmanRight = game.maze[game.getPacMan().row][game.getPacMan().col + 1];
-					 int pacmanUp = game.maze[game.getPacMan().row - 1][game.getPacMan().col];
-					 int pacmanDown = game.maze[game.getPacMan().row + 1][game.getPacMan().col + 1];
+					 int maxVal = 4;
+					 int minMode = 0;
+					 int maxMode = 3;
+					 
+					 int pacmanLeft = game.mazeCopy[game.getPacMan().row][game.getPacMan().col - 1];
+					 int pacmanRight = game.mazeCopy[game.getPacMan().row][game.getPacMan().col + 1];
+					 int pacmanUp = game.mazeCopy[game.getPacMan().row - 1][game.getPacMan().col];
+					 int pacmanDown = game.mazeCopy[game.getPacMan().row + 1][game.getPacMan().col];
+					 
+//					 int pacmanLeft2 = game.mazeCopy[game.getPacMan().row][game.getPacMan().col - 2];
+//					 int pacmanRight2 = game.mazeCopy[game.getPacMan().row][game.getPacMan().col + 2];
+//					 int pacmanUp2 = game.mazeCopy[game.getPacMan().row - 2][game.getPacMan().col];
+//					 int pacmanDown2 = game.mazeCopy[game.getPacMan().row + 2][game.getPacMan().col];
+					 
+					 Ghost catchedGhost = null;
+					 
 					 
 				   for (count = 0; count < EnvConstant.NUMBER_OF_SAMPLES; count++) 
 				   {   
@@ -217,6 +270,7 @@ public class OrganismRunnablePacMan implements Runnable
 					   int perLive_time = 0;
 					   
 					   int stepsAsVulnerable = 0;
+					   boolean startVulnerableMode = false;
 					   
 					   game.startGame();
 					   
@@ -242,63 +296,167 @@ public class OrganismRunnablePacMan implements Runnable
 						   
 //						   in[5] = (game.getPacMan().getRow() - minRows)/maxRows; // CONVERSIONE DA VALORE TRA MIN E MAX A VALORE TRA 0 E 1
 						   
-						   pacmanLeft = game.maze[game.getPacMan().row][game.getPacMan().col - 1];
-						   pacmanRight = game.maze[game.getPacMan().row][game.getPacMan().col + 1];
-						   pacmanUp = game.maze[game.getPacMan().row - 1][game.getPacMan().col];
-						   pacmanDown = game.maze[game.getPacMan().row + 1][game.getPacMan().col + 1];
+						   pacmanLeft = game.mazeCopy[game.getPacMan().row][game.getPacMan().col - 1];
+						   pacmanRight = game.mazeCopy[game.getPacMan().row][game.getPacMan().col + 1];
+						   pacmanUp = game.mazeCopy[game.getPacMan().row - 1][game.getPacMan().col];
+						   pacmanDown = game.mazeCopy[game.getPacMan().row + 1][game.getPacMan().col];
 						   
-						   if (pacmanLeft == -1) pacmanLeft = 0;
-						   if (pacmanRight == -1) pacmanRight = 0;
-						   if (pacmanUp == -1) pacmanUp = 0;
-						   if (pacmanDown == -1) pacmanDown = 0;
+//						   if (game.getPacMan().col - 2 >= 0)
+//							   pacmanLeft2 = game.mazeCopy[game.getPacMan().row][game.getPacMan().col - 2];
+//						   else
+//							   pacmanLeft2 = 1;
+//						   if (game.getPacMan().col + 2 < game.mazeCopy[0].length)
+//							   pacmanRight2 = game.mazeCopy[game.getPacMan().row][game.getPacMan().col + 2];
+//						   else
+//							   pacmanRight2 = 1;
+//						   if (game.getPacMan().row - 2 >= 0)
+//							   pacmanUp2 = game.mazeCopy[game.getPacMan().row - 2][game.getPacMan().col];
+//						   else
+//							   pacmanUp2 = 1;
+//						   if (game.getPacMan().row + 2 < game.mazeCopy.length)
+//							   pacmanDown2 = game.mazeCopy[game.getPacMan().row + 2][game.getPacMan().col];
+//						   else
+//							   pacmanDown2 = 1;
 						   
 						   
-						   in[0] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL
-						   in[1] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW
-						   in[2] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL (AL TEMPO PRECEDENTE)
-						   in[3] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW (AL TEMPO PRECEDENTE)
-						   in[4] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_X = GHOST1_COl
-						   in[5] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_Y = GHOST1_ROW
-						   in[6] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_X = GHOST2_COl
-						   in[7] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_Y = GHOST2_ROW
-						   in[8] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_X = GHOST3_COL
-						   in[9] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_Y = GHOST3_ROW
-						   in[10] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_X = GHOST4_COL
-						   in[11] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_Y = GHOST4_ROW
-						   in[12] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
-						   in[13] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
-						   in[14] = (pacmanUp - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
-						   in[15] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+						   for (Ghost g : game.getGhosts())
+						   {
+							   if (g.row == game.getPacMan().row && g.col == game.getPacMan().col - 1)
+								   pacmanLeft = 4;
+							   if (g.row == game.getPacMan().row && g.col == game.getPacMan().col + 1)
+								   pacmanRight = 4;
+							   if (g.row == game.getPacMan().row - 1 && g.col == game.getPacMan().col)
+								   pacmanUp = 4;
+							   if (g.row == game.getPacMan().row + 1 && g.col == game.getPacMan().col)
+								   pacmanDown = 4;
+							   
+//							   if (g.row == game.getPacMan().row && game.getPacMan().col - 2 >= 0 && g.col == game.getPacMan().col - 2)
+//								   pacmanLeft2 = 4;
+//							   if (g.row == game.getPacMan().row && game.getPacMan().col + 2 < game.mazeCopy[0].length && g.col == game.getPacMan().col + 2)
+//								   pacmanRight2 = 4;
+//							   if (game.getPacMan().row - 2 >= 0 && g.row == game.getPacMan().row - 2 && g.col == game.getPacMan().col)
+//								   pacmanUp2 = 4;
+//							   if (game.getPacMan().row + 2 < game.mazeCopy.length && g.row == game.getPacMan().row + 2 && g.col == game.getPacMan().col)
+//								   pacmanDown2 = 4;
+						   }
 						   
-						   tgt[count][0] = in[0];
-						   tgt[count][1] = in[1];
-						   tgt[count][2] = in[2];
-						   tgt[count][3] = in[3];
-						   tgt[count][4] = in[4];
-						   tgt[count][5] = in[5];
-						   tgt[count][6] = in[6];
-						   tgt[count][7] = in[7];
-						   tgt[count][8] = in[8];
-						   tgt[count][9] = in[9];
-						   tgt[count][10] = in[10];
-						   tgt[count][11] = in[11];
-						   tgt[count][12] = in[12];
-						   tgt[count][13] = in[13];
-						   tgt[count][14] = in[14];
-						   tgt[count][15] = in[15];
+						   
+						   Food nearestFood = getNearestFood();
+						   PowerBall nearestPowerUp = getNearesPowerUp(); 
+						   
+						   int minRowVal = 0;
+						   int maxRowVal = 35;	// 36 righe
+						   int minColVal = 0;
+						   int maxColVal = 30;	// 31 colonne
+
+						   
+						   
+//						   in[0] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL
+//						   in[1] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW
+//						   in[2] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL (AL TEMPO PRECEDENTE)
+//						   in[3] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW (AL TEMPO PRECEDENTE)
+//						   in[4] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_X = GHOST1_COl
+//						   in[5] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_Y = GHOST1_ROW
+//						   in[6] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_X = GHOST2_COl
+//						   in[7] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_Y = GHOST2_ROW
+//						   in[8] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_X = GHOST3_COL
+//						   in[9] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_Y = GHOST3_ROW
+//						   in[10] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_X = GHOST4_COL
+//						   in[11] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_Y = GHOST4_ROW
+//						   in[12] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+//						   in[13] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+//						   in[14] = (pacmanUp - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+//						   in[15] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+//						   
+//						   tgt[count][0] = in[0];
+//						   tgt[count][1] = in[1];
+//						   tgt[count][2] = in[2];
+//						   tgt[count][3] = in[3];
+//						   tgt[count][4] = in[4];
+//						   tgt[count][5] = in[5];
+//						   tgt[count][6] = in[6];
+//						   tgt[count][7] = in[7];
+//						   tgt[count][8] = in[8];
+//						   tgt[count][9] = in[9];
+//						   tgt[count][10] = in[10];
+//						   tgt[count][11] = in[11];
+//						   tgt[count][12] = in[12];
+//						   tgt[count][13] = in[13];
+//						   tgt[count][14] = in[14];
+//						   tgt[count][15] = in[15];
+						   
+//						   in[0] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+//						   in[1] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+//						   in[2] = (pacmanUp - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+//						   in[3] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+//						   in[4] = (pacmanLeft2 - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+//						   in[5] = (pacmanRight2 - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+//						   in[6] = (pacmanUp2 - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+//						   in[7] = (pacmanDown2 - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+//						   in[9] = (nearestFood.row - minRowVal)/maxRowVal;
+//						   in[8] = (nearestFood.col - minColVal)/maxColVal;
+//						   tgt[count][0] = in[0];
+//						   tgt[count][1] = in[1];
+//						   tgt[count][2] = in[2];
+//						   tgt[count][3] = in[3];
+//						   tgt[count][4] = in[4];
+//						   tgt[count][5] = in[5];
+//						   tgt[count][6] = in[6];
+//						   tgt[count][7] = in[7];
+//						   tgt[count][8] = in[8];
+//						   tgt[count][9] = in[9];
+						   
+						   in[0] = (game.getPacMan().row - minRowVal)/maxRowVal;	//PACMAN's ROW
+						   in[1] = (game.getPacMan().col - minColVal)/maxColVal;	//PACMAN'S COL
+						   in[2] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+						   in[3] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+						   in[4] = (pacmanUp - minVal)/maxVal;		//PACMAN'S UP POSITION CONTENT
+						   in[5] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+						   in[6] = (nearestFood.row - minRowVal)/maxRowVal;		//NEAREST FOOD ROW
+						   in[7] = (nearestFood.col - minColVal)/maxColVal;		//NEAREST FOOD COL
+						   in[8] = (nearestPowerUp.row - minRowVal)/maxRowVal;		//NEAREST POWER UP ROW
+						   in[9] = (nearestPowerUp.col - minColVal)/maxColVal;		//NEAREST POWER UP COL
+						   in[10] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_ROW
+						   in[11] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_COl
+						   in[12] = (getMode(game.getGhosts().get(0).mode) - minMode)/maxMode;	//GHOST1_MODE
+						   in[13] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_ROW
+						   in[14] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_COl
+						   in[15] = (getMode(game.getGhosts().get(1).mode) - minMode)/maxMode;	//GHOST2_MODE
+						   in[16] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_ROW
+						   in[17] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_COl
+						   in[18] = (getMode(game.getGhosts().get(2).mode) - minMode)/maxMode;	//GHOST3_MODE
+						   in[19] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_ROW
+						   in[20] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_COl
+						   in[21] = (getMode(game.getGhosts().get(3).mode) - minMode)/maxMode;	//GHOST4_MODE
+						   
+						   
+						   
+						   pacmanLefts.put(total_time, pacmanLeft);
+						   pacmanRights.put(total_time, pacmanRight);
+						   pacmanUps.put(total_time, pacmanUp);
+						   pacmanDowns.put(total_time, pacmanDown);
+						   
+//						   pacmanLefts2.put(total_time, pacmanLeft2);
+//						   pacmanRights2.put(total_time, pacmanRight2);
+//						   pacmanUps2.put(total_time, pacmanUp2);
+//						   pacmanDowns2.put(total_time, pacmanDown2);
+						   
+						   pacmanNearestFoods.put(total_time, nearestFood);
+						   
+//						   pacmanNearestPowerUps.put(total_time, nearestPowerUp);
 						   
 						   pacmanPositions.put(total_time, new Vector2d(game.getPacMan().row, game.getPacMan().col));
-						   ghost1.put(total_time, new Vector2d(game.getGhosts().get(0).row, game.getGhosts().get(0).col));
-						   ghost2.put(total_time, new Vector2d(game.getGhosts().get(1).row, game.getGhosts().get(1).col));
-						   ghost3.put(total_time, new Vector2d(game.getGhosts().get(2).row, game.getGhosts().get(2).col));
-						   ghost4.put(total_time, new Vector2d(game.getGhosts().get(3).row, game.getGhosts().get(3).col));
+						   ghost1.put(total_time, new Vector2d(game.getGhosts().get(0).x, game.getGhosts().get(0).y));
+						   ghost2.put(total_time, new Vector2d(game.getGhosts().get(1).x, game.getGhosts().get(1).y));
+						   ghost3.put(total_time, new Vector2d(game.getGhosts().get(2).x, game.getGhosts().get(2).y));
+						   ghost4.put(total_time, new Vector2d(game.getGhosts().get(3).x, game.getGhosts().get(3).y));
 						   
 //						   System.out.println("PACMAN_LIVES: " + game.getLives());
 						   
 						   int previousCol[] = new int[4];
 						   int previousRow[] = new int[4];
 
-						   while (game.getState() != State.PACMAN_DIED)
+						   while (game.getState() != State.PACMAN_DIED) //== State.PLAYING)
 						   {
 							   previousCol[0] = game.getGhosts().get(0).col;
 							   previousRow[0] = game.getGhosts().get(0).row;
@@ -311,7 +469,10 @@ public class OrganismRunnablePacMan implements Runnable
 //							   System.out.println("PACMAN_COL: " + game.getPacMan().col + " PACMAN_ROW: " + game.getPacMan().row);
 //							   System.out.println("GHOST1_COL: " + game.getGhosts().get(0).col + " GHOST1_ROW: " + game.getGhosts().get(0).row);
 							   // load sensor   
+							   
 							   _net.load_sensors(in);
+							   
+							   game.mazeCopy[game.getPacMan().row][game.getPacMan().col] = 0;
 							   
 							   if (EnvConstant.ACTIVATION_PERIOD == EnvConstant.MANUAL)
 							   {
@@ -347,8 +508,73 @@ public class OrganismRunnablePacMan implements Runnable
 							   double right = out[count][1];
 							   double up = out[count][2];
 							   double down = out[count][3];
+							   double noAction = out[count][4];
 							   
-							   Direction direction = Direction.getDirection(left, right, up, down);
+							   
+							   // **** VINCOLI ****
+							   
+							   // SE L'AZIONE PORTA AD UN MURO, ALLORA LA AZZERO E NON LA CONSIDERO
+							   if (pacmanLeft == 1)
+								   left = -1;
+							   if (pacmanRight == 1)
+								   right = -1;
+							   if (pacmanUp == 1)
+								   up = -1;
+							   if (pacmanDown == 1)
+								   down = -1;
+							   
+							   // SE L'AZIONE PORTA AD UNA CELLA VUOTA E UNA DELLE ALTRE AZIONI POSSIBILI PORTEREBBE AD UN PUNTO, DIMEZZO IL SUO VALORE
+							   if (pacmanLeft == 0 && ( (pacmanRight == 2 || pacmanRight == 3) || (pacmanUp == 2 || pacmanUp == 3) ||
+									   (pacmanDown == 2 || pacmanDown == 3)))
+								   left = left/2;
+							   if (pacmanRight == 0 && ( (pacmanLeft == 2 || pacmanLeft == 3) || (pacmanUp == 2 || pacmanUp == 3) ||
+									   (pacmanDown == 2 || pacmanDown == 3)))
+								   right = right/2;
+							   if (pacmanUp == 0 && ( (pacmanRight == 2 || pacmanRight == 3) || (pacmanLeft == 2 || pacmanLeft == 3) ||
+									   (pacmanDown == 2 || pacmanDown == 3)))
+								   up = up/2;
+							   if (pacmanDown == 0 && ( (pacmanRight == 2 || pacmanRight == 3) || (pacmanUp == 2 || pacmanUp == 3) ||
+									   (pacmanLeft == 2 || pacmanLeft == 3)))
+								   down = down/2;
+							   
+//							   // SE L'AZIONE PORTA AD UNA CELLA CON UN GHOST E PACMAN E' POTENZIATO, ALLORA METTO IL VALORE AD 1, ALTRIMENTI -1
+//							   if ((pacmanLeft == 4 || pacmanLeft2 == 4) && game.getPacMan().canEatGhosts)
+//								   left = 1;
+//							   else if ((pacmanLeft == 4 || pacmanLeft2 == 4) && !game.getPacMan().canEatGhosts)
+//								   left = -1;
+//							   if ((pacmanRight == 4 || pacmanRight2 == 4) && game.getPacMan().canEatGhosts)
+//								   right = 1;
+//							   else if ((pacmanRight == 4 || pacmanRight2 == 4) && !game.getPacMan().canEatGhosts)
+//								   right = -1;
+//							   if ((pacmanUp == 4 || pacmanUp2 == 4) && game.getPacMan().canEatGhosts)
+//								   up = 1;
+//							   else if ((pacmanUp == 4 || pacmanUp2 == 4) && !game.getPacMan().canEatGhosts)
+//								   up = -1;
+//							   if ((pacmanDown == 4 || pacmanDown2 == 4) && game.getPacMan().canEatGhosts)
+//								   down = 1;
+//							   else if ((pacmanDown == 4 || pacmanDown2 == 4) && !game.getPacMan().canEatGhosts)
+//								   down = -1;
+							   
+							   // **** FINE VINCOLI ****
+							   
+							   
+							   
+							   pacmanLeftOutputs.put(total_time, left);
+							   pacmanRightOutputs.put(total_time, right);
+							   pacmanUpOutputs.put(total_time, up);
+							   pacmanDownOutputs.put(total_time, down);
+							   pacmanNoActionsOutputs.put(total_time, noAction);
+							   
+							   
+							   Direction direction = Direction.getDirection(left, right, up, down, noAction, previousDirection, lastDirections);
+							   
+							   previousDirection = direction;
+							   
+							   if (lastDirections.size() == 15)
+								   lastDirections.removeFirst();
+							   
+							   lastDirections.add(direction);
+
 							   
 //							   System.out.println(direction);
 							   
@@ -359,17 +585,40 @@ public class OrganismRunnablePacMan implements Runnable
 //							   Vector2d position2 = new Vector2d(game.getGhosts().get(2).x, game.getGhosts().get(2).y);
 //							   Vector2d position3 = new Vector2d(game.getGhosts().get(3).x, game.getGhosts().get(3).y);
 							   
-							   game.update(direction);
 							   
-							   if (game.getGhosts().get(0).mode == Mode.VULNERABLE)
+							   double previousX = game.getPacMan().x;
+							   double previousY = game.getPacMan().y;				   
+
+							   game.update(direction, "NORMAL");
+
+//							   if (game.getPacMan().x == previousX && game.getPacMan().y == previousY && game.score > 5)
+//							   {
+//								   game.score -= 5;
+//								   game.hiscore -= 5;
+//							   }
+							   
+							   if (startVulnerableMode)
+							   {
 								   stepsAsVulnerable++;
-							   
-							   if (game.getGhosts().get(0).mode == Mode.VULNERABLE && stepsAsVulnerable == 480)
+							   }
+							   else
 							   {
 								   for (Ghost g : game.getGhosts())
-									   g.mode = Mode.NORMAL;
-								   
+									   if (g.mode == Mode.VULNERABLE)
+									   {
+										   startVulnerableMode = true;
+										   break;
+									   }
+							   }
+							   
+							   if (stepsAsVulnerable == 480)
+							   {
+								   for (Ghost g : game.getGhosts())
+									   g.setMode(Mode.NORMAL);
+								  
 								   stepsAsVulnerable = 0;
+								   startVulnerableMode = false;
+								   game.getPacMan().canEatGhosts = false;
 							   }
 							   
 //							   System.out.println(game.getGhosts().get(0).getTargetCol(-27) + " " + game.getGhosts().get(0).getTargetCol(134));
@@ -397,53 +646,151 @@ public class OrganismRunnablePacMan implements Runnable
 //								   game.getGhosts().get(i).updatePlaying();
 //							   }
 							   
-							   pacmanLeft = game.maze[game.getPacMan().row][game.getPacMan().col - 1];
-							   pacmanRight = game.maze[game.getPacMan().row][game.getPacMan().col + 1];
-							   pacmanUp = game.maze[game.getPacMan().row - 1][game.getPacMan().col];
-							   pacmanDown = game.maze[game.getPacMan().row + 1][game.getPacMan().col + 1];
+							   pacmanLeft = game.mazeCopy[game.getPacMan().row][game.getPacMan().col - 1];
+							   pacmanRight = game.mazeCopy[game.getPacMan().row][game.getPacMan().col + 1];
+							   pacmanUp = game.mazeCopy[game.getPacMan().row - 1][game.getPacMan().col];
+							   pacmanDown = game.mazeCopy[game.getPacMan().row + 1][game.getPacMan().col];
 							   
-							   if (pacmanLeft == -1) pacmanLeft = 0;
-							   if (pacmanRight == -1) pacmanRight = 0;
-							   if (pacmanUp == -1) pacmanUp = 0;
-							   if (pacmanDown == -1) pacmanDown = 0;
+//							   if (game.getPacMan().col - 2 >= 0)
+//								   pacmanLeft2 = game.mazeCopy[game.getPacMan().row][game.getPacMan().col - 2];
+//							   else
+//								   pacmanLeft2 = 1;
+//							   if (game.getPacMan().col + 2 < game.mazeCopy[0].length)
+//								   pacmanRight2 = game.mazeCopy[game.getPacMan().row][game.getPacMan().col + 2];
+//							   else
+//								   pacmanRight2 = 1;
+//							   if (game.getPacMan().row - 2 >= 0)
+//								   pacmanUp2 = game.mazeCopy[game.getPacMan().row - 2][game.getPacMan().col];
+//							   else
+//								   pacmanUp2 = 1;
+//							   if (game.getPacMan().row + 2 < game.mazeCopy.length)
+//								   pacmanDown2 = game.mazeCopy[game.getPacMan().row + 2][game.getPacMan().col];
+//							   else
+//								   pacmanDown2 = 1;
 							   
-							   // AGGIORNAMENTO DELLE POSIZIONI
-							   in[0] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL
-							   in[1] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW
-							   in[2] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL (AL TEMPO PRECEDENTE)
-							   in[3] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW (AL TEMPO PRECEDENTE)
-							   in[4] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_X = GHOST1_COl
-							   in[5] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_Y = GHOST1_ROW
-							   in[6] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_X = GHOST2_COl
-							   in[7] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_Y = GHOST2_ROW
-							   in[8] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_X = GHOST3_COL
-							   in[9] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_Y = GHOST3_ROW
-							   in[10] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_X = GHOST4_COL
-							   in[11] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_Y = GHOST4_ROW
-							   in[12] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
-							   in[13] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
-							   in[14] = (pacmanUp - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
-							   in[15] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
 							   
-							   tgt[count][0] = in[0];
-							   tgt[count][1] = in[1];
-							   tgt[count][2] = in[2];
-							   tgt[count][3] = in[3];
-							   tgt[count][4] = in[4];
-							   tgt[count][5] = in[5];
-							   tgt[count][6] = in[6];
-							   tgt[count][7] = in[7];
-							   tgt[count][8] = in[8];
-							   tgt[count][9] = in[9];
-							   tgt[count][10] = in[10];
-							   tgt[count][11] = in[11];
-							   tgt[count][12] = in[12];
-							   tgt[count][13] = in[13];
-							   tgt[count][14] = in[14];
-							   tgt[count][15] = in[15];
+							   for (Ghost g : game.getGhosts())
+							   {
+								   if (g.row == game.getPacMan().row && g.col == game.getPacMan().col - 1)
+									   pacmanLeft = 4;
+								   if (g.row == game.getPacMan().row && g.col == game.getPacMan().col + 1)
+									   pacmanRight = 4;
+								   if (g.row == game.getPacMan().row - 1 && g.col == game.getPacMan().col)
+									   pacmanUp = 4;
+								   if (g.row == game.getPacMan().row + 1 && g.col == game.getPacMan().col)
+									   pacmanDown = 4;
+								   
+//								   if (g.row == game.getPacMan().row && game.getPacMan().col - 2 >= 0 && g.col == game.getPacMan().col - 2)
+//									   pacmanLeft2 = 4;
+//								   if (g.row == game.getPacMan().row && game.getPacMan().col + 2 < game.mazeCopy[0].length && g.col == game.getPacMan().col + 2)
+//									   pacmanRight2 = 4;
+//								   if (game.getPacMan().row - 2 >= 0 && g.row == game.getPacMan().row - 2 && g.col == game.getPacMan().col)
+//									   pacmanUp2 = 4;
+//								   if (game.getPacMan().row + 2 < game.mazeCopy.length && g.row == game.getPacMan().row + 2 && g.col == game.getPacMan().col)
+//									   pacmanDown2 = 4;
+							   }
+							   
+//							   // AGGIORNAMENTO DELLE POSIZIONI
+//							   in[0] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL
+//							   in[1] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW
+//							   in[2] = (game.getPacMan().getCol() - minCols)/maxCols;	//PACMAN_X = PACMAN_COL (AL TEMPO PRECEDENTE)
+//							   in[3] = (game.getPacMan().getRow() - minRows)/maxRows;	//PACMAN_Y = PACMAN_ROW (AL TEMPO PRECEDENTE)
+//							   in[4] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_X = GHOST1_COl
+//							   in[5] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_Y = GHOST1_ROW
+//							   in[6] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_X = GHOST2_COl
+//							   in[7] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_Y = GHOST2_ROW
+//							   in[8] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_X = GHOST3_COL
+//							   in[9] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_Y = GHOST3_ROW
+//							   in[10] = (game.getGhosts().get(3).getCol() - minCols)/maxCols;	//GHOST4_X = GHOST4_COL
+//							   in[11] = (game.getGhosts().get(3).getRow() - minRows)/maxRows;	//GHOST4_Y = GHOST4_ROW
+//							   in[12] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+//							   in[13] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+//							   in[14] = (pacmanUp - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+//							   in[15] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+//							   
+//							   tgt[count][0] = in[0];
+//							   tgt[count][1] = in[1];
+//							   tgt[count][2] = in[2];
+//							   tgt[count][3] = in[3];
+//							   tgt[count][4] = in[4];
+//							   tgt[count][5] = in[5];
+//							   tgt[count][6] = in[6];
+//							   tgt[count][7] = in[7];
+//							   tgt[count][8] = in[8];
+//							   tgt[count][9] = in[9];
+//							   tgt[count][10] = in[10];
+//							   tgt[count][11] = in[11];
+//							   tgt[count][12] = in[12];
+//							   tgt[count][13] = in[13];
+//							   tgt[count][14] = in[14];
+//							   tgt[count][15] = in[15];
+							   
+							   
+							   nearestFood = getNearestFood();
+							   
+							   nearestPowerUp = getNearesPowerUp();
+							   
+							   
+//							   in[0] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+//							   in[1] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+//							   in[2] = (pacmanUp - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+//							   in[3] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+//							   in[4] = (pacmanLeft2 - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+//							   in[5] = (pacmanRight2 - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+//							   in[6] = (pacmanUp2 - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+//							   in[7] = (pacmanDown2 - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+//							   in[9] = (nearestFood.row - minRowVal)/maxRowVal;
+//							   in[8] = (nearestFood.col - minColVal)/maxColVal;
+//							   tgt[count][0] = in[0];
+//							   tgt[count][1] = in[1];
+//							   tgt[count][2] = in[2];
+//							   tgt[count][3] = in[3];
+//							   tgt[count][4] = in[4];
+//							   tgt[count][5] = in[5];
+//							   tgt[count][6] = in[6];
+//							   tgt[count][7] = in[7];
+//							   tgt[count][8] = in[8];
+//							   tgt[count][9] = in[9];
+							   
+							   in[0] = (game.getPacMan().row - minRowVal)/maxRowVal;	//PACMAN's ROW
+							   in[1] = (game.getPacMan().col - minColVal)/maxColVal;	//PACMAN'S COL
+							   in[2] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+							   in[3] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+							   in[4] = (pacmanUp - minVal)/maxVal;		//PACMAN'S UP POSITION CONTENT
+							   in[5] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+							   in[6] = (nearestFood.row - minRowVal)/maxRowVal;		//NEAREST FOOD ROW
+							   in[7] = (nearestFood.col - minColVal)/maxColVal;		//NEAREST FOOD COL
+							   in[8] = (nearestPowerUp.row - minRowVal)/maxRowVal;		//NEAREST POWER UP ROW
+							   in[9] = (nearestPowerUp.col - minColVal)/maxColVal;		//NEAREST POWER UP COL
+							   in[10] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_ROW
+							   in[11] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_COl
+							   in[12] = (getMode(game.getGhosts().get(0).mode) - minMode)/maxMode;	//GHOST1_MODE
+							   in[13] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_ROW
+							   in[14] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_COl
+							   in[15] = (getMode(game.getGhosts().get(1).mode) - minMode)/maxMode;	//GHOST2_MODE
+							   in[16] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_ROW
+							   in[17] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_COl
+							   in[18] = (getMode(game.getGhosts().get(2).mode) - minMode)/maxMode;	//GHOST3_MODE
+							   in[19] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST4_ROW
+							   in[20] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST4_COl
+							   in[21] = (getMode(game.getGhosts().get(0).mode) - minMode)/maxMode;	//GHOST4_MODE
+							   
+							   
+							   pacmanLefts.put(total_time, pacmanLeft);
+							   pacmanRights.put(total_time, pacmanRight);
+							   pacmanUps.put(total_time, pacmanUp);
+							   pacmanDowns.put(total_time, pacmanDown);
+							   
+//							   pacmanLefts2.put(total_time, pacmanLeft2);
+//							   pacmanRights2.put(total_time, pacmanRight2);
+//							   pacmanUps2.put(total_time, pacmanUp2);
+//							   pacmanDowns2.put(total_time, pacmanDown2);
+							   
+							   pacmanNearestFoods.put(total_time, nearestFood);
 							   
 							   // SALVATAGGIO POSIZIONI RISPETTO AL TEMPO TOTALE
-							   pacmanPositions.put(total_time, new Vector2d(game.getPacMan().x, game.getPacMan().y));
+							   pacmanPositions.put(total_time, new Vector2d(game.getPacMan().row, game.getPacMan().col));
+							   
 							   ghostsPositions.get(0).put(total_time, new Vector2d(game.getGhosts().get(0).x, game.getGhosts().get(0).y));
 							   ghostsPositions.get(1).put(total_time, new Vector2d(game.getGhosts().get(1).x, game.getGhosts().get(1).y));
 							   ghostsPositions.get(2).put(total_time, new Vector2d(game.getGhosts().get(2).x, game.getGhosts().get(2).y));
@@ -486,10 +833,302 @@ public class OrganismRunnablePacMan implements Runnable
 							   // AGGIORNAMENTO DEL TEMPO TOTALE (TEMPO INTESO COME PASSI)
 							   total_time++;
 							   
-							   // CHECK PER CATCHED GHSOT
 							   while (game.getState() == State.GHOST_CATCHED)
-								   game.update();
+							   {
+//								   direction = Direction.getDirection(0, 0, 0, 0, 1, previousDirection, lastDirections);
+//								   
+//								   previousDirection = direction;
+//								   
+//								   if (lastDirections.size() == 15)
+//									   lastDirections.removeFirst();
+//								   
+//								   lastDirections.add(direction);
 								   
+								   
+								   
+								   
+								   game.update(direction, "GHOST_CATCHED");
+								   
+								   
+								   
+								   
+								   if (startVulnerableMode)
+								   {
+									   stepsAsVulnerable++;
+								   }
+								   else
+								   {
+									   for (Ghost g : game.getGhosts())
+										   if (g.mode == Mode.VULNERABLE)
+										   {
+											   startVulnerableMode = true;
+											   break;
+										   }
+								   }
+								   
+								   if (stepsAsVulnerable == 480)
+								   {
+									   for (Ghost g : game.getGhosts())
+										   g.setMode(Mode.NORMAL);
+									  
+									   stepsAsVulnerable = 0;
+									   startVulnerableMode = false;
+									   game.getPacMan().canEatGhosts = false;
+								   }
+								   
+								   pacmanLeft = game.mazeCopy[game.getPacMan().row][game.getPacMan().col - 1];
+								   pacmanRight = game.mazeCopy[game.getPacMan().row][game.getPacMan().col + 1];
+								   pacmanUp = game.mazeCopy[game.getPacMan().row - 1][game.getPacMan().col];
+								   pacmanDown = game.mazeCopy[game.getPacMan().row + 1][game.getPacMan().col];
+								   
+//								   if (game.getPacMan().col - 2 >= 0)
+//									   pacmanLeft2 = game.mazeCopy[game.getPacMan().row][game.getPacMan().col - 2];
+//								   else
+//									   pacmanLeft2 = 1;
+//								   if (game.getPacMan().col + 2 < game.mazeCopy[0].length)
+//									   pacmanRight2 = game.mazeCopy[game.getPacMan().row][game.getPacMan().col + 2];
+//								   else
+//									   pacmanRight2 = 1;
+//								   if (game.getPacMan().row - 2 >= 0)
+//									   pacmanUp2 = game.mazeCopy[game.getPacMan().row - 2][game.getPacMan().col];
+//								   else
+//									   pacmanUp2 = 1;
+//								   if (game.getPacMan().row + 2 < game.mazeCopy.length)
+//									   pacmanDown2 = game.mazeCopy[game.getPacMan().row + 2][game.getPacMan().col];
+//								   else
+//									   pacmanDown2 = 1;
+								   
+								   
+								   for (Ghost gh : game.getGhosts())
+								   {
+									   if (gh.row == game.getPacMan().row && gh.col == game.getPacMan().col - 1)
+										   pacmanLeft = 4;
+									   if (gh.row == game.getPacMan().row && gh.col == game.getPacMan().col + 1)
+										   pacmanRight = 4;
+									   if (gh.row == game.getPacMan().row - 1 && gh.col == game.getPacMan().col)
+										   pacmanUp = 4;
+									   if (gh.row == game.getPacMan().row + 1 && gh.col == game.getPacMan().col)
+										   pacmanDown = 4;
+									   
+//									   if (gh.row == game.getPacMan().row && game.getPacMan().col - 2 >= 0 && gh.col == game.getPacMan().col - 2)
+//										   pacmanLeft2 = 4;
+//									   if (gh.row == game.getPacMan().row && game.getPacMan().col + 2 < game.mazeCopy[0].length && gh.col == game.getPacMan().col + 2)
+//										   pacmanRight2 = 4;
+//									   if (game.getPacMan().row - 2 >= 0 && gh.row == game.getPacMan().row - 2 && gh.col == game.getPacMan().col)
+//										   pacmanUp2 = 4;
+//									   if (game.getPacMan().row + 2 < game.mazeCopy.length && gh.row == game.getPacMan().row + 2 && gh.col == game.getPacMan().col)
+//										   pacmanDown2 = 4;
+								   }
+								   
+//								   in[0] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+//								   in[1] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+//								   in[2] = (pacmanUp - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+//								   in[3] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+//								   in[4] = (pacmanLeft2 - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+//								   in[5] = (pacmanRight2 - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+//								   in[6] = (pacmanUp2 - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+//								   in[7] = (pacmanDown2 - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+//								   in[9] = (nearestFood.row - minRowVal)/maxRowVal;
+//								   in[8] = (nearestFood.col - minColVal)/maxColVal;
+//								   tgt[count][0] = in[0];
+//								   tgt[count][1] = in[1];
+//								   tgt[count][2] = in[2];
+//								   tgt[count][3] = in[3];
+//								   tgt[count][4] = in[4];
+//								   tgt[count][5] = in[5];
+//								   tgt[count][6] = in[6];
+//								   tgt[count][7] = in[7];
+//								   tgt[count][8] = in[8];
+//								   tgt[count][9] = in[9];
+								   
+								   nearestFood = getNearestFood();
+								   
+								   nearestPowerUp = getNearesPowerUp();
+								   
+								   in[0] = (game.getPacMan().row - minRowVal)/maxRowVal;	//PACMAN's ROW
+								   in[1] = (game.getPacMan().col - minColVal)/maxColVal;	//PACMAN'S COL
+								   in[2] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+								   in[3] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+								   in[4] = (pacmanUp - minVal)/maxVal;		//PACMAN'S UP POSITION CONTENT
+								   in[5] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+								   in[6] = (nearestFood.row - minRowVal)/maxRowVal;		//NEAREST FOOD ROW
+								   in[7] = (nearestFood.col - minColVal)/maxColVal;		//NEAREST FOOD COL
+								   in[8] = (nearestPowerUp.row - minRowVal)/maxRowVal;		//NEAREST POWER UP ROW
+								   in[9] = (nearestPowerUp.col - minColVal)/maxColVal;		//NEAREST POWER UP COL
+								   in[10] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_ROW
+								   in[11] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_COl
+								   in[12] = (getMode(game.getGhosts().get(0).mode) - minMode)/maxMode;	//GHOST1_MODE
+								   in[13] = (game.getGhosts().get(1).getRow() - minRows)/maxRows;	//GHOST2_ROW
+								   in[14] = (game.getGhosts().get(1).getCol() - minCols)/maxCols;	//GHOST2_COl
+								   in[15] = (getMode(game.getGhosts().get(1).mode) - minMode)/maxMode;	//GHOST2_MODE
+								   in[16] = (game.getGhosts().get(2).getRow() - minRows)/maxRows;	//GHOST3_ROW
+								   in[17] = (game.getGhosts().get(2).getCol() - minCols)/maxCols;	//GHOST3_COl
+								   in[18] = (getMode(game.getGhosts().get(2).mode) - minMode)/maxMode;	//GHOST3_MODE
+								   in[19] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST4_ROW
+								   in[20] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST4_COl
+								   in[21] = (getMode(game.getGhosts().get(0).mode) - minMode)/maxMode;	//GHOST4_MODE
+								   
+								   pacmanLefts.put(total_time, pacmanLeft);
+								   pacmanRights.put(total_time, pacmanRight);
+								   pacmanUps.put(total_time, pacmanUp);
+								   pacmanDowns.put(total_time, pacmanDown);
+								   
+//								   pacmanLefts2.put(total_time, pacmanLeft2);
+//								   pacmanRights2.put(total_time, pacmanRight2);
+//								   pacmanUps2.put(total_time, pacmanUp2);
+//								   pacmanDowns2.put(total_time, pacmanDown2);
+								   
+								   pacmanNearestFoods.put(total_time, nearestFood);
+								   
+								   // SALVATAGGIO POSIZIONI RISPETTO AL TEMPO TOTALE
+								   pacmanPositions.put(total_time, new Vector2d(game.getPacMan().row, game.getPacMan().col));
+								   ghostsPositions.get(0).put(total_time, new Vector2d(game.getGhosts().get(0).x, game.getGhosts().get(0).y));
+								   ghostsPositions.get(1).put(total_time, new Vector2d(game.getGhosts().get(1).x, game.getGhosts().get(1).y));
+								   ghostsPositions.get(2).put(total_time, new Vector2d(game.getGhosts().get(2).x, game.getGhosts().get(2).y));
+								   ghostsPositions.get(3).put(total_time, new Vector2d(game.getGhosts().get(3).x, game.getGhosts().get(3).y));
+								   
+								   pacmanDirections.put(total_time, direction);
+								   
+								   ghostsDirections.get(0).put(total_time, game.getGhosts().get(0).direction);
+								   ghostsDirections.get(1).put(total_time, game.getGhosts().get(1).direction);
+								   ghostsDirections.get(2).put(total_time, game.getGhosts().get(2).direction);
+								   ghostsDirections.get(3).put(total_time, game.getGhosts().get(3).direction);
+								   
+								   ghostsDesiredDirections.get(0).put(total_time, game.getGhosts().get(0).desiredDirection);
+								   ghostsDesiredDirections.get(1).put(total_time, game.getGhosts().get(1).desiredDirection);
+								   ghostsDesiredDirections.get(2).put(total_time, game.getGhosts().get(2).desiredDirection);
+								   ghostsDesiredDirections.get(3).put(total_time, game.getGhosts().get(3).desiredDirection);
+								   
+								   // AGGIORNAMENTO DEL TEMPO PER_VITA (TEMPO INTESO COME PASSI)
+								   perLive_time++; 
+								   
+								   // AGGIORNAMENTO DEL TEMPO TOTALE (TEMPO INTESO COME PASSI)
+								   total_time++;
+							   }
+							   
+//							   if (game.getState() == State.GHOST_CATCHED)
+//							   {
+//								   for (Ghost g : game.getGhosts())
+//									   if (g.mode == Mode.DIED)
+//									   {
+//										   catchedGhost = g;
+//										   break;
+//									   }
+//							   }
+//							   
+//										   
+//								// CHECK PER CATCHED GHSOT
+//								   while (game.getState() == State.GHOST_CATCHED)
+//								   {
+//									   catchedGhost.update();
+//									   
+////									   System.out.println(game.getPacMan().x + " " + game.getPacMan().y);
+//									   
+//									   pacmanLeft = game.mazeCopy[game.getPacMan().row][game.getPacMan().col - 1];
+//									   pacmanRight = game.mazeCopy[game.getPacMan().row][game.getPacMan().col + 1];
+//									   pacmanUp = game.mazeCopy[game.getPacMan().row - 1][game.getPacMan().col];
+//									   pacmanDown = game.mazeCopy[game.getPacMan().row + 1][game.getPacMan().col];
+//									   
+//									   if (game.getPacMan().col - 2 >= 0)
+//										   pacmanLeft2 = game.mazeCopy[game.getPacMan().row][game.getPacMan().col - 2];
+//									   else
+//										   pacmanLeft2 = 1;
+//									   if (game.getPacMan().col + 2 < game.mazeCopy[0].length)
+//										   pacmanRight2 = game.mazeCopy[game.getPacMan().row][game.getPacMan().col + 2];
+//									   else
+//										   pacmanRight2 = 1;
+//									   if (game.getPacMan().row - 2 >= 0)
+//										   pacmanUp2 = game.mazeCopy[game.getPacMan().row - 2][game.getPacMan().col];
+//									   else
+//										   pacmanUp2 = 1;
+//									   if (game.getPacMan().row + 2 < game.mazeCopy.length)
+//										   pacmanDown2 = game.mazeCopy[game.getPacMan().row + 2][game.getPacMan().col];
+//									   else
+//										   pacmanDown2 = 1;
+//									   
+//									   
+//									   for (Ghost gh : game.getGhosts())
+//									   {
+//										   if (gh.row == game.getPacMan().row && gh.col == game.getPacMan().col - 1)
+//											   pacmanLeft = 4;
+//										   if (gh.row == game.getPacMan().row && gh.col == game.getPacMan().col + 1)
+//											   pacmanRight = 4;
+//										   if (gh.row == game.getPacMan().row - 1 && gh.col == game.getPacMan().col)
+//											   pacmanUp = 4;
+//										   if (gh.row == game.getPacMan().row + 1 && gh.col == game.getPacMan().col)
+//											   pacmanDown = 4;
+//										   
+//										   if (gh.row == game.getPacMan().row && game.getPacMan().col - 2 >= 0 && gh.col == game.getPacMan().col - 2)
+//											   pacmanLeft2 = 4;
+//										   if (gh.row == game.getPacMan().row && game.getPacMan().col + 2 < game.mazeCopy[0].length && gh.col == game.getPacMan().col + 2)
+//											   pacmanRight2 = 4;
+//										   if (game.getPacMan().row - 2 >= 0 && gh.row == game.getPacMan().row - 2 && gh.col == game.getPacMan().col)
+//											   pacmanUp2 = 4;
+//										   if (game.getPacMan().row + 2 < game.mazeCopy.length && gh.row == game.getPacMan().row + 2 && gh.col == game.getPacMan().col)
+//											   pacmanDown2 = 4;
+//									   }
+//									   
+//									   in[0] = (pacmanLeft - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+//									   in[1] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+//									   in[2] = (pacmanUp - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+//									   in[3] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+//									   in[4] = (pacmanLeft2 - minVal)/maxVal;	//PACMAN'S LEFT POSITION CONTENT
+//									   in[5] = (pacmanRight2 - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
+//									   in[6] = (pacmanUp2 - minVal)/maxVal;	//PACMAN'S UP POSITION CONTENT
+//									   in[7] = (pacmanDown2 - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
+//									   in[9] = (nearestFood.row - minRowVal)/maxRowVal;
+//									   in[8] = (nearestFood.col - minColVal)/maxColVal;
+//									   tgt[count][0] = in[0];
+//									   tgt[count][1] = in[1];
+//									   tgt[count][2] = in[2];
+//									   tgt[count][3] = in[3];
+//									   tgt[count][4] = in[4];
+//									   tgt[count][5] = in[5];
+//									   tgt[count][6] = in[6];
+//									   tgt[count][7] = in[7];
+//									   tgt[count][8] = in[8];
+//									   tgt[count][9] = in[9];
+//									   
+//									   pacmanLefts.put(total_time, pacmanLeft);
+//									   pacmanRights.put(total_time, pacmanRight);
+//									   pacmanUps.put(total_time, pacmanUp);
+//									   pacmanDowns.put(total_time, pacmanDown);
+//									   
+//									   pacmanLefts2.put(total_time, pacmanLeft2);
+//									   pacmanRights2.put(total_time, pacmanRight2);
+//									   pacmanUps2.put(total_time, pacmanUp2);
+//									   pacmanDowns2.put(total_time, pacmanDown2);
+//									   
+//									   pacmanNearestFoods.put(total_time, nearestFood);
+//									   
+//									   // SALVATAGGIO POSIZIONI RISPETTO AL TEMPO TOTALE
+//									   pacmanPositions.put(total_time, new Vector2d(game.getPacMan().row, game.getPacMan().col));
+//									   ghostsPositions.get(0).put(total_time, new Vector2d(game.getGhosts().get(0).x, game.getGhosts().get(0).y));
+//									   ghostsPositions.get(1).put(total_time, new Vector2d(game.getGhosts().get(1).x, game.getGhosts().get(1).y));
+//									   ghostsPositions.get(2).put(total_time, new Vector2d(game.getGhosts().get(2).x, game.getGhosts().get(2).y));
+//									   ghostsPositions.get(3).put(total_time, new Vector2d(game.getGhosts().get(3).x, game.getGhosts().get(3).y));
+//									   
+//									   pacmanDirections.put(total_time, direction);
+//									   
+//									   ghostsDirections.get(0).put(total_time, game.getGhosts().get(0).direction);
+//									   ghostsDirections.get(1).put(total_time, game.getGhosts().get(1).direction);
+//									   ghostsDirections.get(2).put(total_time, game.getGhosts().get(2).direction);
+//									   ghostsDirections.get(3).put(total_time, game.getGhosts().get(3).direction);
+//									   
+//									   ghostsDesiredDirections.get(0).put(total_time, game.getGhosts().get(0).desiredDirection);
+//									   ghostsDesiredDirections.get(1).put(total_time, game.getGhosts().get(1).desiredDirection);
+//									   ghostsDesiredDirections.get(2).put(total_time, game.getGhosts().get(2).desiredDirection);
+//									   ghostsDesiredDirections.get(3).put(total_time, game.getGhosts().get(3).desiredDirection);
+//									   
+//									   // AGGIORNAMENTO DEL TEMPO PER_VITA (TEMPO INTESO COME PASSI)
+//									   perLive_time++; 
+//									   
+//									   // AGGIORNAMENTO DEL TEMPO TOTALE (TEMPO INTESO COME PASSI)
+//									   total_time++;
+//							   
+//							   }
+//								   
+//							catchedGhost = null;
 						   }
 						   
 						   
@@ -497,7 +1136,7 @@ public class OrganismRunnablePacMan implements Runnable
 //						   game.nextLife();
 //						   game.state = State.PLAYING;
 						   
-						   tgt[count][12] = Double.parseDouble(game.getScore());
+						   tgt[count][12] = Double.parseDouble(game.getHiscore());
 					   }
 					   
 					   game.timestep = total_time;
@@ -553,10 +1192,33 @@ public class OrganismRunnablePacMan implements Runnable
 				   HashMap<Integer,ArrayList<Double>> mappa = (HashMap<Integer, ArrayList<Double>>) ObjRet_fit;
 				   ArrayList<Double> arrayBest = mappa.get(EnvConstant.NUMBER_OF_SAMPLES);
 				   
-				   fit_dyn = Integer.parseInt(game.getScore());//arrayBest.get(MyConstants.FITNESS_TOTALE_INDEX);
+				   
+				   // FITNESS UGUALE ALLO SCORE
+				   fit_dyn = Integer.parseInt(game.getHiscore());//arrayBest.get(MyConstants.FITNESS_TOTALE_INDEX);
+				   
 //				   System.out.println(fit_dyn);
 				   
-				   err_dyn = Math.pow((3333360 - Integer.parseInt(game.getScore())), 2);//arrayBest.get(MyConstants.ERRORE_INDEX);
+				   
+				   // ERRORE IN BASE AL PUNTEGGIO MASSIMO CHE POTREBBE FARE IN UNA PARTITA DI PACMAN NORMALE
+				   err_dyn = Math.pow((3333360 - Integer.parseInt(game.getHiscore())), 2);//arrayBest.get(MyConstants.ERRORE_INDEX);
+				   
+				   
+				   // ERRORE IN BASE A QUANTI COLLEZIONABILI HA PRESO SUL TOTALE NEL LIVELLO
+//				   double errore = (double)game.collectable_current_number/game.collectable_total_number;
+//				   
+//				   err_dyn = Math.pow(errore, 2);
+				   
+				   
+				   
+				   // FITNESS IN BASE A QUANTI COLLEZIONABILI HA PRESO
+//				   double k = 0.00001;
+//				   
+//				   double fitness2 = 1/(err_dyn + k);
+//				   
+//				   fit_dyn = fitness2;
+				   
+				   
+				   
 				   win_dyn = arrayBest.get(MyConstants.WIN_INDEX);
 //				   angle = arrayBest.get(MyConstants.ANGOLO_INDEX);
 //				   velocity = arrayBest.get(MyConstants.VELOCITA_INDEX);
@@ -586,9 +1248,30 @@ public class OrganismRunnablePacMan implements Runnable
 				organism.setMap(map);
 				organism.setPacmanPositions(pacmanPositions);
 				organism.setGhostsPositions(ghostsPositions);
-				organism.setPacmanDirections(pacmanDirections);
+				organism.setPacmanDesiredDirections(pacmanDirections);
 				organism.setGhostsDirections(ghostsDirections);
 				organism.setGhostsDesiredDirections(ghostsDesiredDirections);
+				
+				organism.setPacmanLefts(pacmanLefts);
+				organism.setPacmanRights(pacmanRights);
+				organism.setPacmanUps(pacmanUps);
+				organism.setPacmanDowns(pacmanDowns);
+				
+				organism.setPacmanLefts2(pacmanLefts2);
+				organism.setPacmanRights2(pacmanRights2);
+				organism.setPacmanUps2(pacmanUps2);
+				organism.setPacmanDowns2(pacmanDowns2);
+				
+				organism.setPacmanNoActions(pacmanNoActionsOutputs);
+				
+				organism.setPacmanLeftOutputs(pacmanLeftOutputs);
+				organism.setPacmanRightOutputs(pacmanRightOutputs);
+				organism.setPacmanUpOutputs(pacmanUpOutputs);
+				organism.setPacmanDownOutputs(pacmanDownOutputs);
+				
+				organism.setPacmanNearestFoods(pacmanNearestFoods);
+				
+
 				
 //				System.out.println(organism.getFitness());
 			 } 
@@ -621,6 +1304,57 @@ public class OrganismRunnablePacMan implements Runnable
 			 organism.setWinner(false);
 			 return false;
 		  }
+
+	private int getMode(Mode mode) 
+	{
+		int modeInt = 0;
+		
+		if (mode == Mode.CAGE)
+			modeInt = 0;
+		else if (mode == Mode.NORMAL)
+			modeInt = 1;
+		else if (mode == Mode.VULNERABLE)
+			modeInt = 2;
+		else
+			modeInt = 3;
+		
+		return modeInt;		
+	}
+	
+	private Food getNearestFood() 
+	{
+		Food nearestFood = null;
+		double minDistance = Double.POSITIVE_INFINITY;
+		
+		for (Food f : game.foodList)
+		{
+			double distance = Math.sqrt( Math.pow((f.x - game.getPacMan().x), 2) + Math.pow((f.y - game.getPacMan().y), 2) );
+			if (distance < minDistance)
+			{
+				minDistance = distance;
+				nearestFood = f;
+			}
+		}
+		
+		return nearestFood;
+	}
+	
+	private PowerBall getNearesPowerUp() {
+		PowerBall nearestPowerUp = null;
+		double minDistance = Double.POSITIVE_INFINITY;
+		
+		for (PowerBall p: game.powerUpList)
+		{
+			double distance = Math.sqrt( Math.pow((p.x - game.getPacMan().x), 2) + Math.pow((p.y - game.getPacMan().y), 2) );
+			if (distance < minDistance)
+			{
+				minDistance = distance;
+				nearestPowerUp = p;
+			}
+		}
+		
+		return nearestPowerUp;
+	}
 		
 }
 

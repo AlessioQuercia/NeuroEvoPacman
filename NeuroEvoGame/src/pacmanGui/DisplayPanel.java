@@ -102,10 +102,17 @@ public class DisplayPanel extends JPanel
         game.update();
     }
     
-    public void reproduceSimulatedGame(int timestep, Map<Integer, Direction> pacmanDirections, ArrayList<HashMap<Integer, Integer>> ghostsDirections, 
+    public void reproduceSimulatedGame(int timestep, Map<Integer, Integer> pacmanDirections, Map<Integer, Direction> pacmanDesiredDirections, 
+    		Map<Integer, Vector2d> pacmanPositions, Map<Integer, Vector2d> pacmanCoordinates, ArrayList<HashMap<Integer, Integer>> ghostsDirections, 
     		ArrayList<HashMap<Integer, Integer>> ghostsDesiredDirections, ArrayList<HashMap<Integer, Vector2d>> ghostsPositions)
     {
-    	game.reproduceSimulatedGame(timestep, pacmanDirections, ghostsDirections, ghostsDesiredDirections, ghostsPositions);
+    	game.reproduceSimulatedGame(timestep, pacmanDirections, pacmanDesiredDirections, pacmanPositions, pacmanCoordinates, ghostsDirections, ghostsDesiredDirections, ghostsPositions);
+    }
+    
+    public void reproduceSimulatedGameGhostCatched(Vector2d position, int timestep, Map<Integer, Vector2d> pacmanPositions, ArrayList<HashMap<Integer, Integer>> ghostsDirections, 
+    		ArrayList<HashMap<Integer, Integer>> ghostsDesiredDirections, ArrayList<HashMap<Integer, Vector2d>> ghostsPositions)
+    {
+    	game.reproduceSimulatedGameGhostCatched(position, timestep, pacmanPositions, ghostsDirections, ghostsDesiredDirections, ghostsPositions);
     }
     
     public PacmanGame getGame()

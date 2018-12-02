@@ -43,6 +43,7 @@ import org.joml.Vector2d;
 import common.Direction;
 import common.MyConstants;
 import experiment.OrganismRunnablePacMan;
+import experiment.OrganismRunnablePacMan2;
 import experiment.evo_fit;
 import experiment.evo_in;
 import experiment.evo_out;
@@ -60,7 +61,10 @@ import jneat.Population;
 import jneat.Species;
 import log.HistoryLog;
 import newGui.actor.Ghost;
+import newGui.actor.Pacman;
+import newGui.actor.PowerBall;
 import newGui.actor.Ghost.Mode;
+import newGui.infra.Actor;
 import pacmanGui.PacmanGame;
 import pacmanGui.PacmanGame.State;
 
@@ -266,14 +270,14 @@ private boolean done;
         
         boolean gameStarted = false;
         int startStepsAsVulnerable = 0;
+        
+        long vulnerableStartTime = 0;
 
         
 		while (isRunning)
 		{	
 			long startTime = System.currentTimeMillis();
-			
-
-			
+		
 			if (evolution.getStart() && winners.size() > 0 && evolution.getLeftPanel().getOptionsPanel().getGenerationList().getSelectedItem() != null)
 			{
 				// REPRODUCING PACMAN SIMULATION
@@ -311,6 +315,7 @@ private boolean done;
 					prevSelectedThrow = selectedThrow;
 					
 					timestep = 0;
+                	startStepsAsVulnerable = 0;
 					evolution.getRightPanel().restartGame();
 					gameStarted = true;
 					
@@ -328,6 +333,8 @@ private boolean done;
 					timestep = 0;
 					evolution.getRightPanel().restartGame();
 					gameStarted = true;
+                	startStepsAsVulnerable = 0;
+                	vulnerableStartTime = 0;
 				}
 				
 		        double start = System.currentTimeMillis();
@@ -352,8 +359,12 @@ private boolean done;
 	                if (timestep >= selectedOrg.getGhostsPositions().get(0).size())
 	                {
 	                	timestep = 0;
+	                	while (evolution.getRightPanel().getGame().state != State.GAME_OVER)
+	                		evolution.getRightPanel().getGame().update();
 						evolution.getRightPanel().restartGame();
 						gameStarted = true;
+	                	startStepsAsVulnerable = 0;
+	                	vulnerableStartTime = 0;
 	                }
 	                
 //	                if (!gameStarted)
@@ -365,7 +376,7 @@ private boolean done;
 //	                System.out.println("TIMESTEP: " + timestep + "\n" + 
 //	                					"GHOST1_DIR: " + ghostsDirections.get(0).get(timestep));
 	                
-	                if (evolution.getRightPanel().getGame().state == State.PLAYING)
+	                if (evolution.getRightPanel().getGame().state == State.PLAYING || evolution.getRightPanel().getGame().state == State.GHOST_CATCHED)
 	                {
 //	                	System.out.println("REPRODUCE");
 //		                evolution.getRightPanel().getGame().update(pacmanDirections.get(timestep));
@@ -374,26 +385,92 @@ private boolean done;
 //					   Vector2d position1 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(1).x, evolution.getRightPanel().getGame().getGhosts().get(1).y);
 //					   Vector2d position2 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(2).x, evolution.getRightPanel().getGame().getGhosts().get(2).y);
 //					   Vector2d position3 = new Vector2d(evolution.getRightPanel().getGame().getGhosts().get(3).x, evolution.getRightPanel().getGame().getGhosts().get(3).y);
+					   
+	                	double previousX = evolution.getRightPanel().getGame().getPacMan().x;
+					    double previousY = evolution.getRightPanel().getGame().getPacMan().y;	
+	                	
+	                	if (evolution.getRightPanel().getGame().getState() == State.GHOST_CATCHED)
+	                	{
+//	                		System.out.println("UPDATE_GHOSTCATCHED");
+	                		int row = evolution.getRightPanel().getGame().getPacMan().row;
+	                		int col = evolution.getRightPanel().getGame().getPacMan().col;
+	                		Vector2d position = new Vector2d(row, col);
+	                		evolution.getRightPanel().reproduceSimulatedGameGhostCatched(position, timestep, pacmanPositions, ghostsDirections, ghostsDesiredDirections, ghostsPositions);
+	                	}
+	                	else
+	                	{
+//	                		System.out.println("UPDATE_NORMALE");
+	                		evolution.getRightPanel().reproduceSimulatedGame(timestep, pacmanDirections, pacmanPositions, ghostsDirections, ghostsDesiredDirections, ghostsPositions);	// REPRODUCE THE SIMULATED GAME
+	                	}
 		                
-		                evolution.getRightPanel().reproduceSimulatedGame(timestep, pacmanDirections, ghostsDirections, ghostsDesiredDirections, ghostsPositions);	// REPRODUCE THE SIMULATED GAME
 		                
-		                if (evolution.getRightPanel().getGame().getGhosts().get(0).mode == Mode.VULNERABLE && startStepsAsVulnerable == 0)
+//					   if (evolution.getRightPanel().getGame().getPacMan().x == previousX && evolution.getRightPanel().getGame().getPacMan().y == previousY && evolution.getRightPanel().getGame().score > 5)
+//					   {
+//						   evolution.getRightPanel().getGame().score -= 5;
+//						   evolution.getRightPanel().getGame().hiscore -= 5;
+//					   }
+		                
+		                
+//		                for (Actor a : evolution.getRightPanel().getGame().actors)
+//		                {
+//		                	if (a instanceof PowerBall)
+//		                	{
+//		                		PowerBall p = (PowerBall)a;
+//		                		
+//		                		if (p.eated)
+//		                		{
+//			                		for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
+//			                		{
+//			                			g.mode = Mode.VULNERABLE;
+//			                		}
+//		                		}
+//		                	}
+//		                }
+		                
+		                if (vulnerableStartTime == 0)
+//	                	if (startStepsAsVulnerable == 0)
 		                {
-		                	startStepsAsVulnerable = timestep;
+			                for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
+				                if (g.mode == Mode.VULNERABLE) //&& vulnerableStartTime == 0/*&& startStepsAsVulnerable == 0*/)
+				                {
+				                	startStepsAsVulnerable = timestep;
+				                	vulnerableStartTime = System.currentTimeMillis();
+				                	break;
+				                }
 		                }
 		                
-		                if (evolution.getRightPanel().getGame().getGhosts().get(0).mode == Mode.VULNERABLE && timestep == startStepsAsVulnerable + 480)
+		                if (System.currentTimeMillis() - vulnerableStartTime > 8010 /*&& timestep == startStepsAsVulnerable + 480*/)
+//		                if (timestep - startStepsAsVulnerable == 480)
 		                {
 		                	for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
 		                		g.mode = Mode.NORMAL;
 		                	
 		                	startStepsAsVulnerable = 0;
+		                	vulnerableStartTime = 0;
+		                	evolution.getRightPanel().getGame().getPacMan().canEatGhosts = false;
 		                }
 		                
 						evolution.getLeftPanel().updateInfoRete(selectedOrg);
 						evolution.getLeftPanel().updateInfoLancio(selectedOrg, selectedThrow, timestep);
 		                
 		                timestep++;
+		                
+//		                if (evolution.getRightPanel().getGame().getState() == State.GHOST_CATCHED)
+//		                {
+//		                	evolution.getRightPanel().getGame().update();
+////							   for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
+////								   if (g.mode == Mode.DIED)
+////								   {
+////									    while (evolution.getRightPanel().getGame().getState() == State.GHOST_CATCHED)
+////									    {
+////										    g.update();
+////									    }
+////									   break;
+////								   }
+//						}
+						   
+
+		                
 		                
 //		                if (Math.abs(evolution.getRightPanel().getGame().getGhosts().get(0).x - position0.x) > 1 || Math.abs(evolution.getRightPanel().getGame().getGhosts().get(0).y - position0.y) > 1)
 //				        	System.out.println("WHAT THE FUCK_0 (" + evolution.getRightPanel().getGame().getGhosts().get(0).x + ", " + evolution.getRightPanel().getGame().getGhosts().get(0).y + ") (" + position0.x + ", " + position0.y + ") " + evolution.getRightPanel().getGame().getState());
@@ -406,9 +483,25 @@ private boolean done;
 	                }
 	                else
 	                {
-//	                	System.out.println("UPDATE");
-//	                	System.out.println(evolution.getRightPanel().getGame().state);
-	                	evolution.getRightPanel().getGame().update();
+//	                	System.out.println(evolution.getRightPanel().getGame().getState());
+//						if (evolution.getRightPanel().getGame().getState() == State.GHOST_CATCHED)
+//						{
+//							for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
+//							{
+//								if (g.mode == Mode.DIED)
+//								{
+//									g.update();
+//									g.updateAnimation();
+//									break;
+//								}
+//							}
+//						}
+//						else
+//						{
+	//	                	System.out.println("UPDATE");
+	//	                	System.out.println(evolution.getRightPanel().getGame().state);
+		                	evolution.getRightPanel().getGame().update();
+//						}
 	                }
 	                
 //	                System.out.println(timestep);
@@ -715,6 +808,7 @@ private boolean done;
 			catch (Exception e) 
 			{
 				e.printStackTrace();
+				System.out.println("ERRORE NEL MAIN LOOP");
 			}
 
 		}
@@ -1024,7 +1118,7 @@ private boolean done;
 			   pacmanGame.init();
 			   pacmanGame.startGame();
 			   
-				fixedPool.submit(new OrganismRunnablePacMan(organism, pacmanGame/*evolution.getRightPanel().getGame()*/));	//// VERSIONE PARALLELA
+				fixedPool.submit(new OrganismRunnablePacMan2(organism, pacmanGame/*evolution.getRightPanel().getGame()*/));	//// VERSIONE PARALLELA
 				
 //			//// VERSIONE SERIALE
 //			//evaluate 

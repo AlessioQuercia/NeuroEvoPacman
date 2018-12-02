@@ -48,6 +48,9 @@ public class Ghost extends PacmanActor {
     public long vulnerableModeStartTime;
     public boolean markAsVulnerable;
     
+    private boolean startVuln;
+    private int vulnCount;
+    
     // in this version, i'm using path finder just to return the ghost to the center (cage)
     public ShortestPathFinder pathFinder; 
     
@@ -58,7 +61,7 @@ public class Ghost extends PacmanActor {
         this.pathFinder = new ShortestPathFinder(game.maze);
     }
 
-    private void setMode(Mode mode) {
+    public void setMode(Mode mode) {
         this.mode = mode;
         modeChanged();
     }
@@ -180,20 +183,69 @@ public class Ghost extends PacmanActor {
         switch (mode) {
             case CAGE: 
             case NORMAL:
+            	startVuln = false;
                 frameIndex = 2 * direction + (int) (System.nanoTime() * 0.00000001) % 2;
                 if (!markAsVulnerable) {
                     break;
                 }
             case VULNERABLE:
-                if (System.currentTimeMillis() - vulnerableModeStartTime > 5000) {
+            	if (!startVuln)
+            	{
+            		startVuln = true;
+            		vulnCount = 0;
+            	}
+                if (startVuln && vulnCount > 85/*System.currentTimeMillis() - vulnerableModeStartTime > 5000*/) {
                     frameIndex = 8 + (int) (System.nanoTime() * 0.00000002) % 4;
                 }
-                else {
+//                else
+                else if (startVuln && vulnCount <= 85)
+                {
                     frameIndex = 8 + (int) (System.nanoTime() * 0.00000001) % 2;
                 }
+                
+                vulnCount++;
+                
                 break;
             case DIED:
+            	startVuln = false;
+            	vulnCount = 0;
                 frameIndex = 12 + direction;
+                break;
+        }
+        frame = frames[frameIndex];
+    }
+    
+    public void updateAnimation(int dir, int desiredDir, Vector2d position) {
+        int frameIndex = 0;
+        switch (mode) {
+            case CAGE: 
+            case NORMAL:
+            	startVuln = false;
+                frameIndex = 2 * dir + (int) (System.nanoTime() * 0.00000001) % 2;
+                if (!markAsVulnerable) {
+                    break;
+                }
+            case VULNERABLE:
+            	if (!startVuln)
+            	{
+            		startVuln = true;
+            		vulnCount = 0;
+            	}
+                if (startVuln && vulnCount > 85/*System.currentTimeMillis() - vulnerableModeStartTime > 5000*/) {
+                    frameIndex = 8 + (int) (System.nanoTime() * 0.00000002) % 4;
+                }
+                else if (startVuln && vulnCount <= 85)
+                {
+                    frameIndex = 8 + (int) (System.nanoTime() * 0.00000001) % 2;
+                }
+                
+                vulnCount++;
+                
+                break;
+            case DIED:
+            	startVuln = false;
+            	vulnCount = 0;
+                frameIndex = 12 + dir;
                 break;
         }
         frame = frames[frameIndex];
@@ -275,17 +327,17 @@ public class Ghost extends PacmanActor {
         }
     }
     
-    private PacmanCatchedAction pacmanCatchedAction = new PacmanCatchedAction();
-    
-    private class PacmanCatchedAction implements Runnable {
-        @Override
-        public void run() {
-            game.setState(State.PACMAN_DIED);
-        }
-    }
+//    private PacmanCatchedAction pacmanCatchedAction = new PacmanCatchedAction();
+//    
+//    private class PacmanCatchedAction implements Runnable {
+//        @Override
+//        public void run() {
+//            game.setState(State.PACMAN_DIED);
+//        }
+//    }
     
     private void updateGhostNormal() {
-        if (checkVulnerableModeTime() && markAsVulnerable) {
+        if (/*checkVulnerableModeTime() && */markAsVulnerable) {
             setMode(Mode.VULNERABLE);
             markAsVulnerable = false;
         }
@@ -309,28 +361,32 @@ public class Ghost extends PacmanActor {
 //        }
         
         if (type == 0 || type == 1) {
-            updateGhostMovement(true, pacman.col, pacman.row, 1, pacmanCatchedAction, 0, 1, 2, 3); // chase movement
+            updateGhostMovement(true, pacman.col, pacman.row, 1, true, 0, 1, 2, 3); // chase movement
         }
         else {
-            updateGhostMovement(false, 0, 0, 1, pacmanCatchedAction, 0, 1, 2, 3); // random movement
+            updateGhostMovement(false, 0, 0, 1, true, 0, 1, 2, 3); // random movement
         }
     }
     
-    private GhostCatchedAction ghostCatchedAction = new GhostCatchedAction();
-    
-    private class GhostCatchedAction implements Runnable {
-        @Override
-        public void run() {
-            game.ghostCatched(Ghost.this);
-        }
-    }
+//    private GhostCatchedAction ghostCatchedAction = new GhostCatchedAction();
+//    
+//    private class GhostCatchedAction implements Runnable {
+//        @Override
+//        public void run() {
+//            game.ghostCatched(Ghost.this);
+//        }
+//    }
     
     private void updateGhostVulnerable() {
         if (markAsVulnerable) {
             markAsVulnerable = false;
         }
         
-        updateGhostMovement(true, pacman.col, pacman.row, 1, ghostCatchedAction, 2, 3, 0, 1); // run away movement
+        updateGhostMovement(true, pacman.col, pacman.row, 1, false, 2, 3, 0, 1); // run away movement
+        
+//        // PROVA ----> DA RIMETTERE LA LINEA SOPRA AL POSTO DI QUESTA SOTTO
+//        updateGhostMovement(true, pacman.col, pacman.row, 1, false, 0, 1, 2, 3); // chase movement
+        
 //        // return to normal mode after 8 seconds
 //        if (!checkVulnerableModeTime()) {
 //            setMode(Mode.NORMAL);
@@ -381,6 +437,8 @@ public class Ghost extends PacmanActor {
                     break yield;
                 case 5:
                     setMode(Mode.CAGE);
+                    game.setState(State.PLAYING);
+                    updateAnimation();
                     instructionPointer = 4;
                     break yield;
             }
@@ -388,7 +446,7 @@ public class Ghost extends PacmanActor {
     }    
     
     private void updateGhostMovement(boolean useTarget, int targetCol, int targetRow
-            , int velocity, Runnable collisionWithPacmanAction, int ... desiredDirectionsMap) {
+            , int velocity, boolean pacmanDied, int ... desiredDirectionsMap) {
         desiredDirections.clear();
         if (useTarget) {
             if (targetCol - col > 0) {
@@ -446,8 +504,15 @@ public class Ghost extends PacmanActor {
                         instructionPointer = 0;
                         // adjustHorizontalOutsideMovement();
                     }
-                    if (collisionWithPacmanAction != null && checkCollisionWithPacman()) {
-                        collisionWithPacmanAction.run();
+                    if (checkCollisionWithPacman() && !pacmanDied && game.getPacMan().canEatGhosts) {
+                    	game.ghostCatched(Ghost.this);
+                    	this.died();
+//                    	System.out.println("GHOST DIED");
+                    }
+                    else if (checkCollisionWithPacman() && pacmanDied && !game.getPacMan().canEatGhosts)
+                    {
+                    	game.setState(State.PACMAN_DIED);
+//                    	System.out.println("PACMAN DIED");
                     }
                     break yield;
             }
@@ -601,7 +666,7 @@ public class Ghost extends PacmanActor {
     private void updateGhostCatched(int dir, int desiredDir, Vector2d position) {
         if (mode == Mode.DIED) {
             updateGhostDied(dir, desiredDir, position);
-            updateAnimation();
+            updateAnimation(dir, desiredDir, position);
         }	
 	}
 
@@ -612,11 +677,11 @@ public class Ghost extends PacmanActor {
             case VULNERABLE: updateGhostVulnerable(dir, desiredDir, position); break;
             case DIED: updateGhostDied(dir, desiredDir, position); break;
         }
-        updateAnimation();
+        updateAnimation(dir, desiredDir, position);
     }
     
     private void updateGhostMovement(int dir, int desiredDir, Vector2d position, boolean useTarget, int targetCol, int targetRow
-            , int velocity, Runnable collisionWithPacmanAction, int ... desiredDirectionsMap)
+            , int velocity, boolean pacmanDied, int ... desiredDirectionsMap)
     {
     	
 //        if ((row == 14 && col == 1 && lastDirection == 2) 
@@ -629,8 +694,16 @@ public class Ghost extends PacmanActor {
         
         moveToTargetPosition1((int)position.x, (int)position.y, velocity);
         
-        if (collisionWithPacmanAction != null && checkCollisionWithPacman()) {
-            collisionWithPacmanAction.run();
+        if (checkCollisionWithPacman() && !pacmanDied && game.getPacMan().canEatGhosts) 
+        {
+        	game.ghostCatched(Ghost.this);
+        	this.died();
+        	System.out.println("COLLISION: GHOST DIED");
+        }
+        else if (checkCollisionWithPacman() && pacmanDied && !game.getPacMan().canEatGhosts)
+        {
+        	game.setState(State.PACMAN_DIED);
+        	System.out.println("COLLISION: PACMAN DIED");
         }
         
 //        desiredDirections.clear();
@@ -695,7 +768,7 @@ public class Ghost extends PacmanActor {
     }
     
     private void updateGhostNormal(int dir, int desiredDir, Vector2d position) {
-        if (checkVulnerableModeTime() && markAsVulnerable) {
+        if (/*checkVulnerableModeTime() && */markAsVulnerable) {
             setMode(Mode.VULNERABLE);
             markAsVulnerable = false;
         }
@@ -719,10 +792,10 @@ public class Ghost extends PacmanActor {
 //        }
         
         if (type == 0 || type == 1) {
-            updateGhostMovement(dir, desiredDir, position, true, pacman.col, pacman.row, 1, pacmanCatchedAction, 0, 1, 2, 3); // chase movement
+            updateGhostMovement(dir, desiredDir, position, true, pacman.col, pacman.row, 1, true, 0, 1, 2, 3); // chase movement
         }
         else {
-            updateGhostMovement(dir, desiredDir, position, false, 0, 0, 1, pacmanCatchedAction, 0, 1, 2, 3); // random movement
+            updateGhostMovement(dir, desiredDir, position, false, 0, 0, 1, true, 0, 1, 2, 3); // random movement
         }
 //        System.out.println("COL: " + col + " ROW: " + row + " VALORE: " + game.maze[row][col]);
     }
@@ -732,7 +805,7 @@ public class Ghost extends PacmanActor {
             markAsVulnerable = false;
         }
         
-        updateGhostMovement(dir, desiredDir, position, true, pacman.col, pacman.row, 1, ghostCatchedAction, 2, 3, 0, 1); // run away movement
+        updateGhostMovement(dir, desiredDir, position, true, pacman.col, pacman.row, 1, false, 2, 3, 0, 1); // run away movement
 //        // return to normal mode after 8 seconds
 //        if (!checkVulnerableModeTime()) {
 //            setMode(Mode.NORMAL);
@@ -742,9 +815,17 @@ public class Ghost extends PacmanActor {
     private void updateGhostDied(int dir, int desiredDir, Vector2d position) 
     {
         moveToTargetPosition1((int)position.x, (int)position.y, 4);
+        updateAnimation(dir, desiredDir, position);
         
-        if (this.x == 105 && this.y == 134)
+        if (position.x == 105 && position.y == 134)
+        {
+        	System.out.println("GHOST ARRIVED AT DESTINATION!");
         	setMode(Mode.CAGE);
+//        	modeChanged();
+        	game.setState(State.PLAYING);
+//        	stateChanged();
+            updateAnimation(dir, desiredDir, position);
+        }
         
 //        yield:
 //        while (true) {

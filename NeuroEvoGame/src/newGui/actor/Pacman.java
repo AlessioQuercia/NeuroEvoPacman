@@ -27,6 +27,7 @@ public class Pacman extends PacmanActor {
     public int dx;
     public int dy;
     public long diedTime;
+    public boolean canEatGhosts;
     
     public Pacman(PacmanGame game) {
         super(game);
@@ -46,6 +47,7 @@ public class Pacman extends PacmanActor {
         loadFrames(pacmanFrameNames);
         reset();
         collider = new Rectangle(0, 0, 8, 8);
+        canEatGhosts = false;
     }
 
     private void reset() {
@@ -170,6 +172,8 @@ public class Pacman extends PacmanActor {
                     break yield;
             }
         }
+        	
+        
         updateAnimation();
         if (game.isLevelCleared()) {
             game.levelCleared();
@@ -202,16 +206,32 @@ public class Pacman extends PacmanActor {
                     double angle = Math.toRadians(desiredDirection * 90);
                     dx = (int) Math.cos(angle);
                     dy = (int) Math.sin(angle);
-                    if (game.maze[row + dy][col + dx] == 0) {
-                        direction = desiredDirection;
-                    } 
                     
-                    angle = Math.toRadians(direction * 90);
-                    dx = (int) Math.cos(angle);
-                    dy = (int) Math.sin(angle);
-                    if (game.maze[row + dy][col + dx] == -1) {
-                        break yield;
-                    } 
+                    
+                    try {
+                    	
+                    	
+                        if (game.maze[row + dy][col + dx] == 0) {
+                            direction = desiredDirection;
+                        } 
+                        
+                        
+                        
+                        angle = Math.toRadians(direction * 90);
+                        dx = (int) Math.cos(angle);
+                        dy = (int) Math.sin(angle);
+                        if (game.maze[row + dy][col + dx] == -1) {
+                            break yield;
+                        } 
+                        
+                        
+                        
+					} catch (Exception e) {
+						System.out.println("ERRORE UPDATE PACMAN " + desiredDirection + " " + dx + " " + dy + " " + row + " " + col);
+					}
+
+                    
+
                     
                     col += dx;
                     row += dy;
@@ -243,7 +263,29 @@ public class Pacman extends PacmanActor {
         }
     }
     
-    private void updateAnimation() {
+    
+    public void updatePlaying(int dir, Vector2d position)
+    {
+        if (!visible) {
+            return;
+        }
+        
+        System.out.println(position.x + " " + position.y);
+        
+        direction = dir;
+        
+        moveToTargetPosition1((int)position.x, (int)position.y, 1);
+        
+//        updatePosition();
+        
+        updateAnimation();
+        
+        if (game.isLevelCleared()) {
+            game.levelCleared();
+        }
+    }
+    
+    public void updateAnimation() {
         int frameIndex = 4 * direction + (int) (System.nanoTime() * 0.00000002) % 4;
         frame = frames[frameIndex];
     }
@@ -331,7 +373,17 @@ public class Pacman extends PacmanActor {
 		return row;
 	}
 	
-    public void reproduceSimulatedMove(int timestep, Map<Integer, Direction> directions)
+	@Override
+	public void updateGhostCatched(Vector2d position) 
+	{
+		row = (int) position.x;
+		col = (int) position.y;
+        updatePosition();
+        frame = frames[0];
+        direction = desiredDirection = 0;
+	}
+	
+    public void reproduceSimulatedMove(int timestep, Map<Integer, Integer> directions, Map<Integer, Direction> desiredDirections, Map<Integer, Vector2d> positions, Map<Integer, Vector2d> coordinates)
     {
         switch (game.getState()) 
         {
@@ -340,21 +392,71 @@ public class Pacman extends PacmanActor {
 //	        case TITLE: updateTitle(); break;
 	        case READY: updateReady(); break;
 	        case READY2: updateReady2(); break;
-	        case PLAYING: updatePlaying(directions.get(timestep)); break;
+	        case PLAYING: updatePlaying(directions.get(timestep), coordinates.get(timestep)); break;
 	        case PACMAN_DIED: updatePacmanDied(); break;
-	        case GHOST_CATCHED: updateGhostCatched(); break;
+	        case GHOST_CATCHED: updateGhostCatched(positions.get(timestep)); break; //updatePlaying(directions.get(timestep)); break; 
 	        case LEVEL_CLEARED: updateLevelCleared(); break;
 	        case GAME_OVER: updateGameOver(); break;
         }
 	}
-
+    
+    public void reproduceSimulatedMoveGhostCatched(int timestep, Map<Integer, Vector2d> positions)
+    {
+        switch (game.getState()) 
+        {
+	        case INITIALIZING: updateInitializing(); break;
+	//        case OL_PRESENTS: updateOLPresents(); break;
+//	        case TITLE: updateTitle(); break;
+	        case READY: updateReady(); break;
+	        case READY2: updateReady2(); break;
+	        case PLAYING: updatePlayingReproduced(timestep, positions); break;
+	        case PACMAN_DIED: updatePacmanDied(); break;
+	        case GHOST_CATCHED: updatePlayingReproduced(timestep, positions); break;//updateGhostCatched(); break;
+	        case LEVEL_CLEARED: updateLevelCleared(); break;
+	        case GAME_OVER: updateGameOver(); break;
+        }
+	}
+    
+    public void reproduceSimulatedMoveGhostCatched(Vector2d position, int timestep, Map<Integer, Vector2d> positions)
+    {
+        switch (game.getState()) 
+        {
+	        case INITIALIZING: updateInitializing(); break;
+	//        case OL_PRESENTS: updateOLPresents(); break;
+//	        case TITLE: updateTitle(); break;
+	        case READY: updateReady(); break;
+	        case READY2: updateReady2(); break;
+//	        case PLAYING: updatePlayingReproduced(timestep, positions); break;
+	        case PACMAN_DIED: updatePacmanDied(); break;
+	        case GHOST_CATCHED: updateGhostCatched(position); break;//updateGhostCatched(); break;
+	        case LEVEL_CLEARED: updateLevelCleared(); break;
+	        case GAME_OVER: updateGameOver(); break;
+        }
+	}
+    
 	private void updatePlayingReproduced(int timestep, Map<Integer, Vector2d> positions)
 	{
+		System.out.println(timestep + " " + positions.get(timestep).x + " " + positions.get(timestep).y);
 		this.row = (int) positions.get(timestep).x;
 		this.col = (int) positions.get(timestep).y;
-		 updateAnimation();
+        updatePosition();
+        frame = frames[0];
+        direction = desiredDirection = 0;
+//		 updateAnimation();
 	        if (game.isLevelCleared()) {
 	            game.levelCleared();
 	        }
 	}
+	
+    private boolean moveToTargetPosition1(int targetX, int targetY, int velocity) {
+        int sx = (int) (targetX - x);
+        int sy = (int) (targetY - y);
+        int vx = velocity;
+        int vy = velocity;
+        int idx = vx * sx;
+        int idy = vy * sy;
+        x += idx;
+        y += idy;
+        return sx != 0 || sy != 0;
+    }
 }

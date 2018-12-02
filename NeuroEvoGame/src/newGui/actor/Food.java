@@ -8,16 +8,21 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.io.Serializable;
 
 /**
  * Food class.
  * 
  * @author Leonardo Ono (ono.leo@gmail.com)
  */
-public class Food extends PacmanActor {
+public class Food extends PacmanActor implements Serializable {
     
-    private int col;
-    private int row;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public int col;
+    public int row;
     
     public Food(PacmanGame game, int col, int row) {
         super(game);
@@ -43,6 +48,9 @@ public class Food extends PacmanActor {
         if (game.checkCollision(this, Pacman.class) != null) {
             visible = false;
             game.currentFoodCount--;
+//            System.out.println("Prima: " + game.foodList.size());
+            game.foodList.remove(this);
+//            System.out.println("Dopo: " + game.foodList.size());
             game.addScore(10);
             //System.out.println("current food count: " + game.currentFoodCount);
         }

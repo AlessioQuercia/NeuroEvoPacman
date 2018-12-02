@@ -67,5 +67,10 @@ public class PacmanActor extends Actor<PacmanGame> {
     
     public void stateChanged() {
     }
+
+	public void updateGhostCatched(Vector2d position) {
+		// TODO Auto-generated method stub
+		
+	}
     
 }
