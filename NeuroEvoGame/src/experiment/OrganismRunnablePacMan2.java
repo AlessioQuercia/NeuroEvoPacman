@@ -190,7 +190,7 @@ public class OrganismRunnablePacMan2 implements Runnable
 					 int minRows = 0;
 					 int minCols = 0;
 					 int minVal = 0;
-					 int maxVal = 4;
+					 int maxVal = 5;
 					 int minMode = 0;
 					 int maxMode = 3;
 					 
@@ -204,6 +204,8 @@ public class OrganismRunnablePacMan2 implements Runnable
 					 double up = 0;
 					 double down = 0;
 					 double noAction = 0;
+					 
+					 int currentPowerPills = 4;
 					 
 				   for (count = 0; count < EnvConstant.NUMBER_OF_SAMPLES; count++) 
 				   {   
@@ -339,14 +341,22 @@ public class OrganismRunnablePacMan2 implements Runnable
 							   
 							   for (Ghost g : game.getGhosts())
 							   {
-								   if (g.row == game.getPacMan().row && g.col == game.getPacMan().col - 1)
+								   if (g.row == game.getPacMan().row && g.col == game.getPacMan().col - 1 && g.mode == Mode.NORMAL)
 									   pacmanLeft = 4;
-								   if (g.row == game.getPacMan().row && g.col == game.getPacMan().col + 1)
+								   else if (g.row == game.getPacMan().row && g.col == game.getPacMan().col - 1 && g.mode == Mode.VULNERABLE)
+									   pacmanLeft = 5;
+								   if (g.row == game.getPacMan().row && g.col == game.getPacMan().col + 1 && g.mode == Mode.NORMAL)
 									   pacmanRight = 4;
-								   if (g.row == game.getPacMan().row - 1 && g.col == game.getPacMan().col)
+								   else if (g.row == game.getPacMan().row && g.col == game.getPacMan().col + 1 && g.mode == Mode.VULNERABLE)
+									   pacmanRight = 5;
+								   if (g.row == game.getPacMan().row - 1 && g.col == game.getPacMan().col && g.mode == Mode.NORMAL)
 									   pacmanUp = 4;
-								   if (g.row == game.getPacMan().row + 1 && g.col == game.getPacMan().col)
+								   else if (g.row == game.getPacMan().row - 1 && g.col == game.getPacMan().col && g.mode == Mode.VULNERABLE)
+									   pacmanUp = 5;
+								   if (g.row == game.getPacMan().row + 1 && g.col == game.getPacMan().col && g.mode == Mode.NORMAL)
 									   pacmanDown = 4;
+								   else if (g.row == game.getPacMan().row + 1 && g.col == game.getPacMan().col && g.mode == Mode.VULNERABLE)
+									   pacmanDown = 5;
 							   }
 							   
 							   nearestFood = getNearestFood();
@@ -451,21 +461,38 @@ public class OrganismRunnablePacMan2 implements Runnable
 								   down = down/2;
 							   
 							   // SE L'AZIONE PORTA AD UNA CELLA CON UN GHOST E PACMAN E' POTENZIATO, ALLORA METTO IL VALORE AD 1, ALTRIMENTI -1
-							   if ((pacmanLeft == 4) && game.getPacMan().canEatGhosts)
+//							   if ((pacmanLeft == 4) && game.getPacMan().canEatGhosts)
+//								   left = 1;
+//							   else if ((pacmanLeft == 4) && !game.getPacMan().canEatGhosts)
+//								   left = -1;
+//							   if ((pacmanRight == 4) && game.getPacMan().canEatGhosts)
+//								   right = 1;
+//							   else if ((pacmanRight == 4) && !game.getPacMan().canEatGhosts)
+//								   right = -1;
+//							   if ((pacmanUp == 4) && game.getPacMan().canEatGhosts)
+//								   up = 1;
+//							   else if ((pacmanUp == 4) && !game.getPacMan().canEatGhosts)
+//								   up = -1;
+//							   if ((pacmanDown == 4) && game.getPacMan().canEatGhosts)
+//								   down = 1;
+//							   else if ((pacmanDown == 4) && !game.getPacMan().canEatGhosts)
+//								   down = -1;
+							   
+							   if (pacmanLeft == 5)
 								   left = 1;
-							   else if ((pacmanLeft == 4) && !game.getPacMan().canEatGhosts)
+							   else if (pacmanLeft == 4)
 								   left = -1;
-							   if ((pacmanRight == 4) && game.getPacMan().canEatGhosts)
+							   if (pacmanRight == 5)
 								   right = 1;
-							   else if ((pacmanRight == 4) && !game.getPacMan().canEatGhosts)
+							   else if (pacmanRight == 4)
 								   right = -1;
-							   if ((pacmanUp == 4) && game.getPacMan().canEatGhosts)
+							   if (pacmanUp == 5)
 								   up = 1;
-							   else if ((pacmanUp == 4) && !game.getPacMan().canEatGhosts)
+							   else if (pacmanUp == 4)
 								   up = -1;
-							   if ((pacmanDown == 4) && game.getPacMan().canEatGhosts)
+							   if (pacmanDown == 5)
 								   down = 1;
-							   else if ((pacmanDown == 4) && !game.getPacMan().canEatGhosts)
+							   else if (pacmanDown == 4)
 								   down = -1;
 							   
 							   // **** FINE VINCOLI ****
@@ -539,20 +566,29 @@ public class OrganismRunnablePacMan2 implements Runnable
 							   
 							   
 							   // CHECK VULNERABLE MODE
-
+							   
+							   if (game.powerUpList.size() < currentPowerPills)
+							   {
+								   startVulnerableMode = true;
+								   stepsAsVulnerable = 0;
+								   currentPowerPills = game.powerUpList.size();
+//								   for (Ghost g : game.getGhosts())
+//									   g.setMode(Mode.VULNERABLE);
+							   }
+							   
 							   if (startVulnerableMode)
 							   {
 								   stepsAsVulnerable++;
 							   }
-							   else
-							   {
-								   for (Ghost g : game.getGhosts())
-									   if (g.mode == Mode.VULNERABLE)
-									   {
-										   startVulnerableMode = true;
-										   break;
-									   }
-							   }
+//							   else
+//							   {
+//								   for (Ghost g : game.getGhosts())
+//									   if (g.mode == Mode.VULNERABLE)
+//									   {
+//										   startVulnerableMode = true;
+//										   break;
+//									   }
+//							   }
 							   
 							   if (stepsAsVulnerable == 480)
 							   {
@@ -635,20 +671,29 @@ public class OrganismRunnablePacMan2 implements Runnable
 								   game.update(desiredDirection, "GHOST_CATCHED");
 								   
 								// CHECK VULNERABLE MODE
+								   
+								   if (game.powerUpList.size() < currentPowerPills)
+								   {
+									   startVulnerableMode = true;
+									   stepsAsVulnerable = 0;
+									   currentPowerPills = game.powerUpList.size();
+//									   for (Ghost g : game.getGhosts())
+//										   g.setMode(Mode.VULNERABLE);
+								   }
 
 								   if (startVulnerableMode)
 								   {
 									   stepsAsVulnerable++;
 								   }
-								   else
-								   {
-									   for (Ghost g : game.getGhosts())
-										   if (g.mode == Mode.VULNERABLE)
-										   {
-											   startVulnerableMode = true;
-											   break;
-										   }
-								   }
+//								   else
+//								   {
+//									   for (Ghost g : game.getGhosts())
+//										   if (g.mode == Mode.VULNERABLE)
+//										   {
+//											   startVulnerableMode = true;
+//											   break;
+//										   }
+//								   }
 								   
 								   if (stepsAsVulnerable == 480)
 								   {

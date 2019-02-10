@@ -694,16 +694,17 @@ public class Ghost extends PacmanActor {
         
         moveToTargetPosition1((int)position.x, (int)position.y, velocity);
         
-        if (checkCollisionWithPacman() && !pacmanDied && game.getPacMan().canEatGhosts) 
+        if (checkCollisionWithPacman() && !pacmanDied && game.getPacMan().canEatGhosts && mode == Mode.VULNERABLE) 
         {
         	game.ghostCatched(Ghost.this);
         	this.died();
-        	System.out.println("COLLISION: GHOST DIED");
+//        	System.out.println("COLLISION: GHOST DIED");
         }
-        else if (checkCollisionWithPacman() && pacmanDied && !game.getPacMan().canEatGhosts)
+//        else if (checkCollisionWithPacman() && pacmanDied && !game.getPacMan().canEatGhosts)
+        else if (checkCollisionWithPacman() && pacmanDied)
         {
         	game.setState(State.PACMAN_DIED);
-        	System.out.println("COLLISION: PACMAN DIED");
+//        	System.out.println("COLLISION: PACMAN DIED");
         }
         
 //        desiredDirections.clear();
@@ -823,6 +824,7 @@ public class Ghost extends PacmanActor {
         	setMode(Mode.CAGE);
 //        	modeChanged();
         	game.setState(State.PLAYING);
+        	System.out.println(game.getState());
 //        	stateChanged();
             updateAnimation(dir, desiredDir, position);
         }

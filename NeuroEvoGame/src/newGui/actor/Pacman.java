@@ -270,7 +270,7 @@ public class Pacman extends PacmanActor {
             return;
         }
         
-        System.out.println(position.x + " " + position.y);
+//        System.out.println(position.x + " " + position.y);
         
         direction = dir;
         

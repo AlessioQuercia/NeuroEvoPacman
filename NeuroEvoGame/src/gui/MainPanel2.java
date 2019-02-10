@@ -274,6 +274,12 @@ private boolean done;
         int startStepsAsVulnerable = 0;
         
         long vulnerableStartTime = 0;
+        
+        boolean startVulnerableMode = false;
+        int stepsAsVulnerable = 0;
+        int currentPowerPills = 4;
+        
+        
 
         
 		while (isRunning)
@@ -318,6 +324,7 @@ private boolean done;
 					
 					timestep = 0;
                 	startStepsAsVulnerable = 0;
+                	currentPowerPills = 4;
 					evolution.getRightPanel().restartGame();
 					gameStarted = true;
 					
@@ -337,6 +344,7 @@ private boolean done;
 					gameStarted = true;
                 	startStepsAsVulnerable = 0;
                 	vulnerableStartTime = 0;
+                	currentPowerPills = 4;
 				}
 				
 		        double start = System.currentTimeMillis();
@@ -374,6 +382,7 @@ private boolean done;
 						gameStarted = true;
 	                	startStepsAsVulnerable = 0;
 	                	vulnerableStartTime = 0;
+	                	currentPowerPills = 4;
 	                }
 	                
 	                if (evolution.getRightPanel().getGame().state == State.PLAYING || evolution.getRightPanel().getGame().state == State.GHOST_CATCHED)
@@ -386,28 +395,52 @@ private boolean done;
 	                	
 	                	// CHECK IF GHOSTS ARE VULNERABLE
 	                	
-		                if (vulnerableStartTime == 0)
-//	                	if (startStepsAsVulnerable == 0)
-		                {
-			                for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
-				                if (g.mode == Mode.VULNERABLE) //&& vulnerableStartTime == 0/*&& startStepsAsVulnerable == 0*/)
-				                {
-				                	startStepsAsVulnerable = timestep;
-				                	vulnerableStartTime = System.currentTimeMillis();
-				                	break;
-				                }
-		                }
-		                
-		                if (System.currentTimeMillis() - vulnerableStartTime > 8500 /*&& timestep == startStepsAsVulnerable + 480*/)
-//		                if (timestep - startStepsAsVulnerable == 480)
-		                {
-		                	for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
-		                		g.mode = Mode.NORMAL;
-		                	
-		                	startStepsAsVulnerable = 0;
-		                	vulnerableStartTime = 0;
-		                	evolution.getRightPanel().getGame().getPacMan().canEatGhosts = false;
-		                }
+					   if (evolution.getRightPanel().getGame().powerUpList.size() < currentPowerPills)
+					   {
+						   startVulnerableMode = true;
+						   stepsAsVulnerable = 0;
+						   currentPowerPills = evolution.getRightPanel().getGame().powerUpList.size();
+						   for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
+							   g.setMode(Mode.VULNERABLE);
+					   }
+					   
+					   if (startVulnerableMode)
+					   {
+						   stepsAsVulnerable++;
+					   }
+					   
+					   if (stepsAsVulnerable > 480)
+					   {
+						   for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
+							   g.setMode(Mode.NORMAL);
+						  
+						   stepsAsVulnerable = 0;
+						   startVulnerableMode = false;
+						   evolution.getRightPanel().getGame().getPacMan().canEatGhosts = false;
+					   }
+	                	
+//		                if (vulnerableStartTime == 0)
+////	                	if (startStepsAsVulnerable == 0)
+//		                {
+//			                for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
+//				                if (g.mode == Mode.VULNERABLE) //&& vulnerableStartTime == 0/*&& startStepsAsVulnerable == 0*/)
+//				                {
+//				                	startStepsAsVulnerable = timestep;
+//				                	vulnerableStartTime = System.currentTimeMillis();
+//				                	break;
+//				                }
+//		                }
+//		                
+//		                if (System.currentTimeMillis() - vulnerableStartTime > 8500 /*&& timestep == startStepsAsVulnerable + 480*/)
+////		                if (timestep - startStepsAsVulnerable == 480)
+//		                {
+//		                	for (Ghost g : evolution.getRightPanel().getGame().getGhosts())
+//		                		g.mode = Mode.NORMAL;
+//		                	
+//		                	startStepsAsVulnerable = 0;
+//		                	vulnerableStartTime = 0;
+//		                	evolution.getRightPanel().getGame().getPacMan().canEatGhosts = false;
+//		                }
 		                
 						evolution.getLeftPanel().updateInfoRete(selectedOrg);
 						evolution.getLeftPanel().updateInfoLancio(selectedOrg, selectedThrow, timestep);
