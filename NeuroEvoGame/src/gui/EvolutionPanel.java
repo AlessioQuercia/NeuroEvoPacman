@@ -530,7 +530,7 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 					getLeftPanel().getOptionsPanel().getGenerationList().addItem(o.getGeneration());
 					getLeftPanel().getOptionsPanel().getGenerationList().setSelectedItem(o.getGeneration());
 					
-					MainPanel.winners.add(o);
+					MainPanel2.winners.add(o);
 				}
 				
 				success = true;

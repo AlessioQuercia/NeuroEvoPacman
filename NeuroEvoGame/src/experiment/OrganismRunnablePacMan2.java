@@ -783,7 +783,7 @@ public class OrganismRunnablePacMan2 implements Runnable
 //				   err_dyn = Math.pow((12454 - Integer.parseInt(game.getHiscore())), 2);
 				   
 //				   // ERRORE IN BASE AL PUNTEGGIO MASSIMO SU UN SINGOLO LIVELLO
-				   err_dyn = 12454 - Integer.parseInt(game.getHiscore());
+				   err_dyn = MyConstants.MAX_ERROR - Integer.parseInt(game.getHiscore());
 				   
 				   
 				   // ERRORE IN BASE A QUANTI COLLEZIONABILI HA PRESO SUL TOTALE NEL LIVELLO
@@ -794,11 +794,13 @@ public class OrganismRunnablePacMan2 implements Runnable
 				   
 				   
 				   // FITNESS IN FUNZIONE DELL'ERRORE, NORMALIZZATA DA 
-				   double k = 0.00001;
+//				   double k = 0.01;
 				   
-				   double fitness2 = 1/(err_dyn + k);
+//				   double fitness2 = 1/(err_dyn + k);
 				   
-				   fit_dyn = fitness2;
+				   double fitness3 = MyConstants.MAX_ERROR - err_dyn;
+				   
+				   fit_dyn = fitness3;
 				   
 				   
 				   
@@ -823,7 +825,7 @@ public class OrganismRunnablePacMan2 implements Runnable
 				organism.setFitness(fit_dyn);
 //				organism.setOrig_fitness(fit_dyn);
 				organism.setError(err_dyn);
-				organism.setTotalError(total_err);
+				organism.setTotalError(err_dyn);
 				organism.setAngle(angle);
 				organism.setVelocity(velocity);
 				organism.setYTarget(y_target);

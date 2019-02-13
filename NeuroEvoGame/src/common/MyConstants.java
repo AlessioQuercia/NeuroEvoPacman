@@ -12,11 +12,14 @@ public class MyConstants
 	public static int OPTIONS_WIDTH = 220;
 	public static int LANCIO_WIDTH = 520;
 	
+	public static int EPOCHS_NUMBER = 100;
+	
 	/////COSTANTI PER IL CALCOLO DELLA FITNESS
 	public static int NUMBER_OF_SAMPLES = 10;
 //	public static int FITNESS_CONSTANT = 200;
 //	public static int MAX_FITNESS_PER_ORGANISM = (int) Math.pow(FITNESS_CONSTANT, 2);
-	public static int MAX_FITNESS = 3333360;
+	public static int MAX_FITNESS = 12454;
+	public static int MAX_ERROR = 12454;
 
 	/////INDICI DELLE INFORMAZIONI SUL LANCIO
 	public static int PACMAN_LEFT = 0;

@@ -68,14 +68,14 @@ public class Graphs extends JPanel implements ActionListener
 //    	leftPanel.getOptionsPanel().getGridButton().addActionListener(this);
 //    	leftPanel.getForzaOptionsPanel().getAutodrawBtn().addActionListener(this);
     	
-		fitnessChart = new Chart(f, 500, MyConstants.MAX_FITNESS, "Generation", "Fitness", 10, 5);
+		fitnessChart = new Chart(f, MyConstants.EPOCHS_NUMBER, MyConstants.MAX_FITNESS, "Generation", "Fitness", 10, 5);
 		fitnessChart.addLine("Mean fitness", Color.BLUE);	// AGGIUNTA LINEA PER RAPPRESENTARE FITNESS MEDIA
 		fitnessChart.addLine("Mean cloned fitness", Color.GREEN);	// AGGIUNTA LINEA PER RAPPRESENTARE FITNESS MEDIA DEI CLONATI
 		fitnessChart.addLine("Highest fitness", Color.RED);	// AGGIUNTA LINEA PER RAPPRESENTARE FITNESS PIU' ALTA
 		fitnessChart.setGrid(true);
 		fitnessChart.setBorder(BorderFactory.createTitledBorder("Fitness chart"));
 		
-		errorChart = new Chart(f, 500, 500, "Generation", "Error", 10, 10);
+		errorChart = new Chart(f, MyConstants.EPOCHS_NUMBER, MyConstants.MAX_ERROR, "Generation", "Error", 10, 10);
 //		errorChart.addLine("Mean error", Color.BLUE);	// AGGIUNTA LINEA PER RAPPRESENTARE ERRORE MEDIO
 		errorChart.addLine("Lowest error", Color.RED);	// AGGIUNTA LINEA PER RAPPRESENTARE ERRORE PIU' BASSO
 		errorChart.setGrid(true);
