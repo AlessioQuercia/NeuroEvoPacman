@@ -877,6 +877,7 @@ public class Ghost extends PacmanActor {
     private void updateGhostCage(int dir, int desiredDir, Vector2d position)
     {
     	moveToTargetPosition1((int)position.x, (int)position.y, 1);
+    	updateAnimation(dir, desiredDir, position);
     	
     	if (this.x == 109 && this.y == 110)
     	{

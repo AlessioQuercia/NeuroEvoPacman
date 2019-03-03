@@ -1057,11 +1057,12 @@ private boolean done;
 			//point to organism
 			   Organism organism = ((Organism) itr_organism.next());
 			   
-			   PacmanGame pacmanGame = new PacmanGame();
-			   pacmanGame.init();
-			   pacmanGame.startGame();
+//			   PacmanGame pacmanGame = new PacmanGame();
+//			   pacmanGame.init();
+//			   pacmanGame.startGame();
 			   
-				fixedPool.submit(new OrganismRunnablePacMan2(organism, pacmanGame/*evolution.getRightPanel().getGame()*/));	//// VERSIONE PARALLELA
+//				fixedPool.submit(new OrganismRunnablePacMan2(organism, pacmanGame/*evolution.getRightPanel().getGame()*/));	//// VERSIONE PARALLELA
+			   fixedPool.submit(new OrganismRunnablePacMan2(organism));	//// VERSIONE PARALLELA
 				
 //			//// VERSIONE SERIALE
 //			//evaluate 

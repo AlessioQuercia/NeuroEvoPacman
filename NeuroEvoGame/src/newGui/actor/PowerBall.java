@@ -1,6 +1,7 @@
 package newGui.actor;
 
 import java.awt.Rectangle;
+import java.io.Serializable;
 
 import pacmanGui.PacmanActor;
 import pacmanGui.PacmanGame;
@@ -11,9 +12,13 @@ import pacmanGui.PacmanGame.State;
  * 
  * @author Leonardo Ono (ono.leo@gmail.com)
  */
-public class PowerBall extends PacmanActor {
+public class PowerBall extends PacmanActor implements Serializable {
     
-    public int col;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public int col;
     public int row;
     public boolean eated;
     

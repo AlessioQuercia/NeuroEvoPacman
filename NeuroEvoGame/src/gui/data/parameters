@@ -3,7 +3,7 @@ p_trait_param_mut_prob  0.5
 p_trait_mutation_power  1.0
 p_linktrait_mut_sig  1.0
 p_nodetrait_mut_sig  0.5
-p_weight_mut_power  3.5
+p_weight_mut_power  2.5
 p_recur_prob  0.1
 p_disjoint_coeff  1.0
 p_excess_coeff  1.0
@@ -26,7 +26,7 @@ p_mate_multipoint_avg_prob  0.3
 p_mate_singlepoint_prob  0.3
 p_mate_only_prob  0.2
 p_recur_only_prob  0.0
-p_pop_size  25
+p_pop_size  30
 p_dropoff_age  25
 p_newlink_tries  50
 p_print_every  1000

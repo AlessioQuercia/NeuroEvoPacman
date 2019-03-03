@@ -46,6 +46,7 @@ public class OrganismRunnablePacMan2 implements Runnable
 	private Map<Integer, Integer> pacmanUps2;
 	private Map<Integer, Integer> pacmanDowns2;
 	private Map<Integer, Food> pacmanNearestFoods;
+	private Map<Integer, PowerBall> pacmanNearestPowerPills;
 	private Map<Integer, Double> pacmanLeftOutputs;
 	private Map<Integer, Double> pacmanRightOutputs;
 	private Map<Integer, Double> pacmanUpOutputs;
@@ -62,10 +63,11 @@ public class OrganismRunnablePacMan2 implements Runnable
 		  Method Method_fit;
 		  Object ObjRet_fit;
 	
-	public OrganismRunnablePacMan2(Organism o, PacmanGame game) 
+	public OrganismRunnablePacMan2(Organism o) 
 	{
 		this.o = o;
-		this.game = game;
+		this.game = new PacmanGame();
+		this.game.init();
 		
 		this.pacmanPositions = new HashMap<Integer, Vector2d> ();
 		this.pacmanCoordinates = new HashMap<Integer, Vector2d>();
@@ -87,6 +89,7 @@ public class OrganismRunnablePacMan2 implements Runnable
 		this.pacmanDowns2 = new HashMap<>();
 		
 		this.pacmanNearestFoods = new HashMap<>();
+		this.pacmanNearestPowerPills = new HashMap<>();
 		
 		this.pacmanLeftOutputs = new HashMap<>();
 		this.pacmanRightOutputs = new HashMap<>();
@@ -281,6 +284,7 @@ public class OrganismRunnablePacMan2 implements Runnable
 						   pacmanDowns.put(total_time, pacmanDown);
 						   
 						   pacmanNearestFoods.put(total_time, nearestFood);
+						   pacmanNearestPowerPills.put(total_time, nearestPowerUp);
 						   
 //						   pacmanNearestPowerUps.put(total_time, nearestPowerUp);
 						   
@@ -372,10 +376,26 @@ public class OrganismRunnablePacMan2 implements Runnable
 							   in[3] = (pacmanRight - minVal)/maxVal;	//PACMAN'S RIGHT POSITION CONTENT
 							   in[4] = (pacmanUp - minVal)/maxVal;		//PACMAN'S UP POSITION CONTENT
 							   in[5] = (pacmanDown - minVal)/maxVal;	//PACMAN'S DOWN POSITION CONTENT
-							   in[6] = (nearestFood.row - minRows)/maxRows;		//NEAREST FOOD ROW
-							   in[7] = (nearestFood.col - minCols)/maxCols;		//NEAREST FOOD COL
-							   in[8] = (nearestPowerUp.row - minRows)/maxRows;		//NEAREST POWER UP ROW
-							   in[9] = (nearestPowerUp.col - minCols)/maxCols;		//NEAREST POWER UP COL
+							   if (nearestFood != null)
+							   {
+								   in[6] = (nearestFood.row - minRows)/maxRows;		//NEAREST FOOD ROW
+								   in[7] = (nearestFood.col - minCols)/maxCols;		//NEAREST FOOD COL
+							   }
+							   else
+							   {
+								   in[6] = -1;		//NEAREST FOOD ROW
+								   in[7] = -1;		//NEAREST FOOD COL
+							   }
+							   if (nearestPowerUp != null)
+							   {
+								   in[8] = (nearestPowerUp.row - minRows)/maxRows;		//NEAREST POWER UP ROW
+								   in[9] = (nearestPowerUp.col - minCols)/maxCols;		//NEAREST POWER UP COL
+							   }
+							   else
+							   {
+								   in[8] = -1;
+								   in[9] = -1;
+							   }
 							   in[10] = (game.getGhosts().get(0).getRow() - minRows)/maxRows;	//GHOST1_ROW
 							   in[11] = (game.getGhosts().get(0).getCol() - minCols)/maxCols;	//GHOST1_COl
 							   in[12] = (getMode(game.getGhosts().get(0).mode) - minMode)/maxMode;	//GHOST1_MODE
@@ -523,6 +543,7 @@ public class OrganismRunnablePacMan2 implements Runnable
 							   pacmanDowns.put(total_time, pacmanDown);
 							   
 							   pacmanNearestFoods.put(total_time, nearestFood);
+							   pacmanNearestPowerPills.put(total_time, nearestPowerUp);
 							   
 //							   pacmanNearestPowerUps.put(total_time, nearestPowerUp);
 							   
@@ -630,6 +651,7 @@ public class OrganismRunnablePacMan2 implements Runnable
 								   pacmanDowns.put(total_time, pacmanDown);
 								   
 								   pacmanNearestFoods.put(total_time, nearestFood);
+								   pacmanNearestPowerPills.put(total_time, nearestPowerUp);
 								   
 //								   pacmanNearestPowerUps.put(total_time, nearestPowerUp);
 								   
@@ -857,6 +879,7 @@ public class OrganismRunnablePacMan2 implements Runnable
 				organism.setPacmanDownOutputs(pacmanDownOutputs);
 				
 				organism.setPacmanNearestFoods(pacmanNearestFoods);
+				organism.setPacmanNearestPowerPills(pacmanNearestPowerPills);
 				
 				organism.setHighScore(Integer.parseInt(game.getHiscore()));
 				

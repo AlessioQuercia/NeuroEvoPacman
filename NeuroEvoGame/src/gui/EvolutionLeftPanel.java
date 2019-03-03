@@ -234,7 +234,7 @@ public class EvolutionLeftPanel extends JPanel
 		try {
 		 info_rete =
 				"errore totale:  " + (int)o.getError() + "\n" + //fmt6d.format(o.getError() + "\n") +
-				"fitness totale:  " + fmt6d.format(o.getOrig_fitness()) + "\n" +
+				"fitness totale:  " + (int)o.getOrig_fitness() + "\n" +
 				"score: " + o.getHighScore();
 //				"fitness vecchia:  " + array.get(MyConstants.FITNESS_VECCHIA_INDEX);
 		}
@@ -242,7 +242,7 @@ public class EvolutionLeftPanel extends JPanel
 		{
 			info_rete =
 					"errore totale:  " + "UNKNOWN" + "\n" +
-					"fitness totale:  " + fmt6d.format(o.getOrig_fitness());
+					"fitness totale:  " + (int)o.getOrig_fitness();
 		}
 			
 			netPanel.getInfoRete().setText(info_rete);
@@ -253,7 +253,67 @@ public class EvolutionLeftPanel extends JPanel
 		ArrayList<Double> array = o.getMap().get(lancio);
 		try {
 			
-			String info_lancio = 
+			String info_lancio = "";
+			
+			String input = "";
+			String output = "";
+			
+			if (o.getPacmanNearestFoods().get(timestep) == null)
+			{
+				input = "Pacman_position: (" + o.getPacmanPositions().get(timestep).x + ", " + o.getPacmanPositions().get(timestep).y + ")" + "\n" + 
+						"Ghost1_position: (" + o.getGhostsPositions().get(0).get(timestep).x + ", " + o.getGhostsPositions().get(0).get(timestep).y + ")" + "\n" + 
+						"Ghost2_position: (" + o.getGhostsPositions().get(1).get(timestep).x + ", " + o.getGhostsPositions().get(1).get(timestep).y + ")" + "\n" + 
+						"Ghost3_position: (" + o.getGhostsPositions().get(2).get(timestep).x + ", " + o.getGhostsPositions().get(2).get(timestep).y + ")" + "\n" + 
+						"Ghost1_position: (" + o.getGhostsPositions().get(3).get(timestep).x + ", " + o.getGhostsPositions().get(3).get(timestep).y + ")" + "\n" + 
+						"Pacman_left: " + o.getPacmanLefts().get(timestep) + "\n" +
+						"Pacman_right: " + o.getPacmanRights().get(timestep) + "\n" +
+						"Pacman_up: " + o.getPacmanUps().get(timestep) + "\n" +
+						"Pacman_down: " + o.getPacmanDowns().get(timestep) + "\n" +
+						"Nearest_Food: None" + "\n" +
+						"Nearest_PowerPill: (" + o.getPacmanNearestPowerPills().get(timestep).row + ", " + o.getPacmanNearestPowerPills().get(timestep).col + ")" + "\n" + 
+						"timestep:  " + timestep + "\n";
+			}
+			else if (o.getPacmanNearestPowerPills().get(timestep) == null)
+			{
+				input = "Pacman_position: (" + o.getPacmanPositions().get(timestep).x + ", " + o.getPacmanPositions().get(timestep).y + ")" + "\n" + 
+						"Ghost1_position: (" + o.getGhostsPositions().get(0).get(timestep).x + ", " + o.getGhostsPositions().get(0).get(timestep).y + ")" + "\n" + 
+						"Ghost2_position: (" + o.getGhostsPositions().get(1).get(timestep).x + ", " + o.getGhostsPositions().get(1).get(timestep).y + ")" + "\n" + 
+						"Ghost3_position: (" + o.getGhostsPositions().get(2).get(timestep).x + ", " + o.getGhostsPositions().get(2).get(timestep).y + ")" + "\n" + 
+						"Ghost1_position: (" + o.getGhostsPositions().get(3).get(timestep).x + ", " + o.getGhostsPositions().get(3).get(timestep).y + ")" + "\n" + 
+						"Pacman_left: " + o.getPacmanLefts().get(timestep) + "\n" +
+						"Pacman_right: " + o.getPacmanRights().get(timestep) + "\n" +
+						"Pacman_up: " + o.getPacmanUps().get(timestep) + "\n" +
+						"Pacman_down: " + o.getPacmanDowns().get(timestep) + "\n" +
+						"Nearest_Food: (" + o.getPacmanNearestFoods().get(timestep).row + ", " + o.getPacmanNearestFoods().get(timestep).col + ")" + "\n" + 
+						"Nearest_PowerPill: None" + "\n" + 
+						"timestep:  " + timestep + "\n";
+			}
+			else
+			{
+				input = "Pacman_position: (" + o.getPacmanPositions().get(timestep).x + ", " + o.getPacmanPositions().get(timestep).y + ")" + "\n" + 
+						"Ghost1_position: (" + o.getGhostsPositions().get(0).get(timestep).x + ", " + o.getGhostsPositions().get(0).get(timestep).y + ")" + "\n" + 
+						"Ghost2_position: (" + o.getGhostsPositions().get(1).get(timestep).x + ", " + o.getGhostsPositions().get(1).get(timestep).y + ")" + "\n" + 
+						"Ghost3_position: (" + o.getGhostsPositions().get(2).get(timestep).x + ", " + o.getGhostsPositions().get(2).get(timestep).y + ")" + "\n" + 
+						"Ghost1_position: (" + o.getGhostsPositions().get(3).get(timestep).x + ", " + o.getGhostsPositions().get(3).get(timestep).y + ")" + "\n" + 
+						"Pacman_left: " + o.getPacmanLefts().get(timestep) + "\n" +
+						"Pacman_right: " + o.getPacmanRights().get(timestep) + "\n" +
+						"Pacman_up: " + o.getPacmanUps().get(timestep) + "\n" +
+						"Pacman_down: " + o.getPacmanDowns().get(timestep) + "\n" +
+						"Nearest_Food: (" + o.getPacmanNearestFoods().get(timestep).row + ", " + o.getPacmanNearestFoods().get(timestep).col + ")" + "\n" + 
+						"Nearest_PowerPill: (" + o.getPacmanNearestPowerPills().get(timestep).row + ", " + o.getPacmanNearestPowerPills().get(timestep).col + ")" + "\n" + 
+						"timestep:  " + timestep + "\n";
+			}
+			
+			output = "Pacman_left_output: " + fmt6d.format(o.getPacmanLeftOutputs().get(timestep)) + "\n" + 
+					 "Pacman_right_output: " + fmt6d.format(o.getPacmanRightOutputs().get(timestep))  + "\n" + 
+					 "Pacman_up_output: " + fmt6d.format(o.getPacmanUpOutputs().get(timestep))  + "\n" + 
+					 "Pacman_down_output: " + fmt6d.format(o.getPacmanDownOutputs().get(timestep)) + "\n" + 
+					 "Pacman_noAction_output " + fmt6d.format(o.getPacmanNoActionsOutputs().get(timestep)) + "\n" + 
+					 "Pacman_Action: " + o.getPacmanDesiredDirections().get(timestep);
+			
+			info_lancio = input + output;
+			
+//			info_lancio = 
 	//				"Pacman_x:  " + o.getPacmanPositions().get(timestep).x + "\n" +
 	//				"Pacman_y:  " + o.getPacmanPositions().get(timestep).y + "\n" +
 	//				"Pacman_direction:  " + o.getPacmanDirections().get(timestep) + "\n" +
@@ -269,24 +329,29 @@ public class EvolutionLeftPanel extends JPanel
 	//				"Ghost_4_x:  " + o.getGhostsPositions().get(3).get(timestep).x + "\n" +
 	//				"Ghost_4_y:  " + o.getGhostsPositions().get(3).get(timestep).y + "\n" +
 	//				"Ghost_4_direction:  " + Ghost.getDirection(o.getGhostsDirections().get(3).get(timestep)) + "\n" +
-					"Pacman_left: " + o.getPacmanLefts().get(timestep) + "\n" +
-					"Pacman_right: " + o.getPacmanRights().get(timestep) + "\n" +
-					"Pacman_up: " + o.getPacmanUps().get(timestep) + "\n" +
-					"Pacman_down: " + o.getPacmanDowns().get(timestep) + "\n" +
+//					"Pacman_position: (" + o.getPacmanPositions().get(timestep).x + ", " + o.getPacmanPositions().get(timestep).y + ")" + "\n" + 
+//					"Ghost1_position: (" + o.getGhostsPositions().get(0).get(timestep).x + ", " + o.getGhostsPositions().get(0).get(timestep).y + ")" + "\n" + 
+//					"Ghost2_position: (" + o.getGhostsPositions().get(1).get(timestep).x + ", " + o.getGhostsPositions().get(1).get(timestep).y + ")" + "\n" + 
+//					"Ghost3_position: (" + o.getGhostsPositions().get(2).get(timestep).x + ", " + o.getGhostsPositions().get(2).get(timestep).y + ")" + "\n" + 
+//					"Ghost1_position: (" + o.getGhostsPositions().get(3).get(timestep).x + ", " + o.getGhostsPositions().get(3).get(timestep).y + ")" + "\n" + 
+//					"Pacman_left: " + o.getPacmanLefts().get(timestep) + "\n" +
+//					"Pacman_right: " + o.getPacmanRights().get(timestep) + "\n" +
+//					"Pacman_up: " + o.getPacmanUps().get(timestep) + "\n" +
+//					"Pacman_down: " + o.getPacmanDowns().get(timestep) + "\n" +
 //					"Pacman_left2: " + o.getPacmanLefts2().get(timestep) + "\n" +
 //					"Pacman_right2: " + o.getPacmanRights2().get(timestep) + "\n" +
 //					"Pacman_up2: " + o.getPacmanUps2().get(timestep) + "\n" +
 //					"Pacman_down2: " + o.getPacmanDowns2().get(timestep) + "\n" +
-					"Nearest_Coin_Row: " + o.getPacmanNearestFoods().get(timestep).row + "\n" + 
-					"Nearest_Coin_Col: " + o.getPacmanNearestFoods().get(timestep).col + "\n" + 
-					"timestep:  " + timestep + "\n" +
-					"Pacman_left_output: " + fmt6d.format(o.getPacmanLeftOutputs().get(timestep)) + "\n" + 
-					"Pacman_right_output: " + fmt6d.format(o.getPacmanRightOutputs().get(timestep))  + "\n" + 
-					"Pacman_up_output: " + fmt6d.format(o.getPacmanUpOutputs().get(timestep))  + "\n" + 
-					"Pacman_down_output: " + fmt6d.format(o.getPacmanDownOutputs().get(timestep)) + "\n" + 
-					"Pacman_noAction_output " + fmt6d.format(o.getPacmanNoActionsOutputs().get(timestep)) + "\n" + 
-					"Pacman_Action: " + o.getPacmanDesiredDirections().get(timestep);
-					;
+//					"Nearest_Food: (" + o.getPacmanNearestFoods().get(timestep).row + ", " + o.getPacmanNearestFoods().get(timestep).col + ")" + "\n" + 
+//					"Nearest_PowerPill: (" + o.getPacmanNearestPowerPills().get(timestep).row + ", " + o.getPacmanNearestPowerPills().get(timestep).col + ")" + "\n" + 
+//					"timestep:  " + timestep + "\n" +
+//					"Pacman_left_output: " + fmt6d.format(o.getPacmanLeftOutputs().get(timestep)) + "\n" + 
+//					"Pacman_right_output: " + fmt6d.format(o.getPacmanRightOutputs().get(timestep))  + "\n" + 
+//					"Pacman_up_output: " + fmt6d.format(o.getPacmanUpOutputs().get(timestep))  + "\n" + 
+//					"Pacman_down_output: " + fmt6d.format(o.getPacmanDownOutputs().get(timestep)) + "\n" + 
+//					"Pacman_noAction_output " + fmt6d.format(o.getPacmanNoActionsOutputs().get(timestep)) + "\n" + 
+//					"Pacman_Action: " + o.getPacmanDesiredDirections().get(timestep);
+//					;
 			
 			throwPanel.getInfoLancio().setText(info_lancio);
 		}
