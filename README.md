@@ -1,7 +1,5 @@
 # NeuroEvoGame
 
-**Owner:** Alessio Quercia
-
 ## Overview
 
 The repository is intended to monitor the progress of the project related to the Intelligent Systems course at Università degli Studi di Milano. 
