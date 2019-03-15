@@ -1,7 +1,5 @@
 # NeuroEvoPacman
 
-# Mirage
-
 ## Overview
 The repository is intended to keep track of the progress of the project related to the Intelligent Systems course at Università degli Studi di Milano. 
 
