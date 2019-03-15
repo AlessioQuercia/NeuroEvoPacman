@@ -9,7 +9,7 @@ Pac-Man implementation has been taken by an existing repo (see Links section) an
 For more info, read the report in the Links section.
 
 ## Links
-**Report**: https://github.com/AlessioQuercia/NeuroEvoPacman/blob/master/Neuroevolution%20of%20a%20Pacman%20player.pdf
+**Report**: https://github.com/AlessioQuercia/NeuroEvoPacman/blob/master/NeuroevolutionPacmanPlayer.pdf
 
 **Pac-Man implementation**: https://github.com/leonardo-ono/Java2DPacmanGame
 
