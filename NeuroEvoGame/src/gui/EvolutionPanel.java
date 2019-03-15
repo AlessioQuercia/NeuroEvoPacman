@@ -552,7 +552,7 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 		public boolean storeBestNet(Organism o)
 		{
 			boolean success = false;
-			String nomefile = "generation_" + o.getGeneration();
+			String nomefile = "Generation_" + o.getGeneration();
 			try 
 			{
 				File file = new File(MyConstants.RESULTS_DIR + nomefile);
@@ -582,7 +582,7 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 			for (int i=0; i<14; i++)
 				array.add(0.0);
 			
-			String nomefile = "generation_" + generazione;
+			String nomefile = "Generation_" + generazione;
 			try 
 			{
 				File file = new File(MyConstants.RESULTS_DIR + nomefile);
@@ -597,17 +597,11 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 					{
 						String errore [] = br.readLine().split(" ");
 						String fitnesst [] = br.readLine().split(" ");
-						String fitnessv [] = br.readLine().split(" ");
-						String bestThrow [] = br.readLine().split(" ");
 							
 						double err = Double.parseDouble(errore[errore.length-1]);
 						double fitt = Double.parseDouble(fitnesst[fitnesst.length-1]);
-						double fitv = Double.parseDouble(fitnessv[fitnessv.length-1]);
-						double best = Double.parseDouble(bestThrow[bestThrow.length-1]);
 						array.set(MyConstants.ERRORE_TOTALE_INDEX, err);
 						array.set(MyConstants.FITNESS_TOTALE_INDEX, fitt);
-						array.set(MyConstants.FITNESS_VECCHIA_INDEX, fitv);			
-						array.set(MyConstants.LANCIO_MIGLIORE_INDEX, best);		
 					}
 					else if (currentLine.equals("------ LANCIO: "+ lancio +" ------"))
 					{
@@ -671,7 +665,7 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 			for (int i=0; i<MyConstants.INFO_RETE_SIZE; i++)
 				array.add(0.0);
 			
-			String nomefile = "generation_" + generazione;
+			String nomefile = "Generation_" + generazione;
 			String lancioA = lancio;
 			try 
 			{
@@ -772,10 +766,8 @@ public class EvolutionPanel extends JPanel implements ActionListener, KeyListene
 			}				
 			
 	        String infoRete = "------ GENERAZIONE: "+o.getGeneration() +" ------" + "\n" +
-	        		"ERRORE TOTALE: "+fmt6d.format(mappa.get(EnvConstant.NUMBER_OF_SAMPLES).get(MyConstants.ERRORE_TOTALE_INDEX)) + "\n" + 
-	        		"FITNESS TOTALE: "+fmt6d.format(mappa.get(EnvConstant.NUMBER_OF_SAMPLES).get(MyConstants.FITNESS_TOTALE_INDEX)) + "\n" + 
-	        		"FITNESS VECCHIA: "+fmt6d.format(mappa.get(EnvConstant.NUMBER_OF_SAMPLES).get(MyConstants.FITNESS_VECCHIA_INDEX)) + "\n" +
-	        		"LANCIO MIGLIORE: "+ (mappa.get(EnvConstant.NUMBER_OF_SAMPLES).get(MyConstants.LANCIO_MIGLIORE_INDEX).intValue()) + "\n";
+	        		"ERRORE TOTALE: "+fmt6d.format(o.getError()) + "\n" + 
+	        		"FITNESS TOTALE: "+fmt6d.format(o.getOrig_fitness()) + "\n";
 	        
 	        String infoFile = infoRete + infoLanci;
 	        

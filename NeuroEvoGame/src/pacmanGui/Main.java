@@ -4,6 +4,8 @@ import newGui.infra.Display;
 import newGui.infra.Game;
 import pacmanGui.PacmanGame;
 
+import java.io.Serializable;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -13,9 +15,10 @@ import javax.swing.SwingUtilities;
  * 
  * @author Leonardo Ono (ono.leo@gmail.com)
  */
-public class Main {
+public class Main{
 
-    public static void main(String[] args) {
+
+	public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
 
             @Override

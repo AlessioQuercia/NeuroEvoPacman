@@ -3,6 +3,8 @@ package newGui.infra;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
+
 import javax.imageio.ImageIO;
 
 /**
@@ -10,9 +12,13 @@ import javax.imageio.ImageIO;
  * 
  * @author Leonardo Ono (ono.leo@gmail.com)
  */
-public class BitmapFontRenderer {
+public class BitmapFontRenderer implements Serializable{
     
-    public BufferedImage bitmapFontImage;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public BufferedImage bitmapFontImage;
     public BufferedImage[] letters;
     
     public int letterWidth;

@@ -1,5 +1,6 @@
 package pacmanGui;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.joml.Vector2d;
@@ -13,7 +14,13 @@ import newGui.infra.Actor;
  */
 public class PacmanActor extends Actor<PacmanGame> {
 
-    public PacmanActor(PacmanGame game) {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public PacmanActor(PacmanGame game) {
         super(game);
     }
 

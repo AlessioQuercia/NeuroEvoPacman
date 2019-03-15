@@ -5,15 +5,20 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
+import java.io.Serializable;
 
 /**
  * Display class.
  * 
  * @author Leonardo Ono (ono.leo@gmail.com)
  */
-public class Display extends Canvas {
+public class Display extends Canvas implements Serializable {
    
-    private Game game;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Game game;
     private boolean running;
     private BufferStrategy bs;
     

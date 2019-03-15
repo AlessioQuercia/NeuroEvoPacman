@@ -1125,8 +1125,8 @@ private boolean done;
 			   if (bestPopOrg != null)
 			   {
 				   evolution.storeBestNet(bestPopOrg);
-				   String name = MyConstants.RESULTS_DIR + "prova_" + bestPopOrg.getGeneration();
-				   evolution.serializeOnFile(name, bestPopOrg);
+//				   String name = MyConstants.RESULTS_DIR + "Organism_" + bestPopOrg.getGeneration();
+//				   evolution.serializeOnFile(name, bestPopOrg);
 			   }
 			}
 			
@@ -1220,8 +1220,10 @@ private boolean done;
 				   
 				   winners.add(o);
 				   evolution.storeBestNet(o);
-				   String nomefile = MyConstants.RESULTS_DIR + "prova_" + o.getGeneration();
-				   evolution.serializeOnFile(nomefile, o);
+//				   String nomefile = MyConstants.RESULTS_DIR + "Organism_" + o.getGeneration();
+//				   evolution.serializeOnFile(nomefile, o);
+					String nome = "Population_" + pop.getFinal_gen();
+					pop.print_to_file_by_species(MyConstants.POPULATIONS_DIR + nome);
 				   evolution.updateSimulationPanel(o);
 				   graphs.updateForzaOptionsPanel(o);
 				   net.updateNetPanel(o);

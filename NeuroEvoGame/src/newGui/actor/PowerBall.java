@@ -12,12 +12,8 @@ import pacmanGui.PacmanGame.State;
  * 
  * @author Leonardo Ono (ono.leo@gmail.com)
  */
-public class PowerBall extends PacmanActor implements Serializable {
+public class PowerBall extends PacmanActor {
     
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	public int col;
     public int row;
     public boolean eated;

@@ -3,6 +3,7 @@ package newGui.infra;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,9 +24,15 @@ import newGui.actor.Pacman;
  * 
  * @author Leonardo Ono (ono.leo@gmail.com)
  */
-public class Game{
+public class Game implements Serializable
+{
     
-    public Dimension screenSize;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	public Dimension screenSize;
     public Point2D screenScale;
 
 	public List<Actor> actors = new ArrayList<Actor>();

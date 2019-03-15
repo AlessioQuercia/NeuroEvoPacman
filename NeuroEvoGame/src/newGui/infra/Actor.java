@@ -4,7 +4,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,15 +22,20 @@ import org.joml.Vector2d;
  * 
  * @author Leonardo Ono (ono.leo@gmail.com)
  */
-public class Actor<T extends Game> {
+public class Actor<T extends Game> implements Serializable {
     
-    public static final boolean DRAW_COLLIDER = false;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public static final boolean DRAW_COLLIDER = false;
     
     public T game;
     public double x, y;
 	public boolean visible;
-    public BufferedImage frame;
-    public BufferedImage[] frames;
+    transient public BufferedImage frame;
+    transient public BufferedImage[] frames;
     public Rectangle collider; 
     
     protected int instructionPointer;
@@ -76,4 +86,48 @@ public class Actor<T extends Game> {
         }
     }
     
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        ImageIO.write(frame, "png", buffer);
+
+        out.writeInt(buffer.size()); // Prepend image with byte count
+        buffer.writeTo(out);         // Write image
+        
+        out.writeInt(frames.length); // how many images are serialized?
+
+        for (int i = 0; i<frames.length; i++) 
+        {
+            buffer = new ByteArrayOutputStream();
+            ImageIO.write(frames[i], "png", buffer);
+
+            out.writeInt(buffer.size()); // Prepend image with byte count
+            buffer.writeTo(out);         // Write image
+        }
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException 
+    {
+        in.defaultReadObject();
+        
+        int size = in.readInt(); // Read byte count
+
+        byte[] buffer = new byte[size];
+        in.readFully(buffer); // Make sure you read all bytes of the image
+
+        frame = ImageIO.read(new ByteArrayInputStream(buffer));
+
+        int imageCount = in.readInt();
+        frames = new BufferedImage[imageCount];
+        for (int i = 0; i < imageCount; i++) 
+        {
+            size = in.readInt(); // Read byte count
+
+            buffer = new byte[size];
+            in.readFully(buffer); // Make sure you read all bytes of the image
+
+            frames[i] = ImageIO.read(new ByteArrayInputStream(buffer));
+        }
+    }
 }

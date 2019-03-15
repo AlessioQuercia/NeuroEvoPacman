@@ -1,28 +1,23 @@
 package newGui.actor;
 
-import newGui.infra.Keyboard;
 import pacmanGui.PacmanActor;
 import pacmanGui.PacmanGame;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
-import java.io.Serializable;
 
 /**
  * Food class.
  * 
  * @author Leonardo Ono (ono.leo@gmail.com)
  */
-public class Food extends PacmanActor implements Serializable {
+public class Food extends PacmanActor {
     
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	public int col;
     public int row;
+    
+    public Food(PacmanGame game) { super(game); }
     
     public Food(PacmanGame game, int col, int row) {
         super(game);

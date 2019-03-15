@@ -1,6 +1,7 @@
 package newGui.infra;
 
 import java.awt.Point;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,9 +10,13 @@ import java.util.List;
  * 
  * @author Leonardo Ono (ono.leo@gmail.com)
  */
-public class ShortestPathFinder {
+public class ShortestPathFinder implements Serializable {
     
-    // map[row][col]
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	// map[row][col]
     // -1 = wall
     public int[][] map;
     public List<Integer> path = new ArrayList<Integer>();
