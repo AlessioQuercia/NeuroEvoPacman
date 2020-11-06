@@ -27,9 +27,3 @@ For more info, read the report inside the repository.
 ![](gifs/3.gif)
 
 ![](gifs/4.gif)
-
-### Example 3
-
-![](gifs/5.gif)
-
-![](gifs/6.gif)
