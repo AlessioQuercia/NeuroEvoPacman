@@ -1114,7 +1114,7 @@ private boolean done;
 			   if (win)
 				  cause2 = " winner";
 			
-			   // Salva su file l'intera popolazione per poter ricominciare da lì (implementazione originale)
+			   // Salva su file l'intera popolazione per poter ricominciare da lï¿½ (implementazione originale)
 //			   String name_of_specie = EnvRoutine.getJneatFileData(filename) + generation;
 //			   pop.print_to_file_by_species(name_of_specie);
 				String nome = "Population_" + pop.getFinal_gen();

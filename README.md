@@ -13,3 +13,23 @@ For more info, read the report inside the repository.
 **Pac-Man implementation**: https://github.com/leonardo-ono/Java2DPacmanGame
 
 **NEAT**: http://nn.cs.utexas.edu/?neat
+
+## Demo
+
+### Example 1
+
+![](gifs/1.gif)
+
+![](gifs/2.gif)
+
+### Example 2
+
+![](gifs/3.gif)
+
+![](gifs/4.gif)
+
+### Example 3
+
+![](gifs/5.gif)
+
+![](gifs/6.gif)
